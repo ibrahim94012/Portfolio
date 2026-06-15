@@ -2,17 +2,349 @@
 <html lang="bn" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio — Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DevCard — Dynamic Portfolio</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ══ THEMES (matched to TypeForge) ══ */
+[data-theme="dark"]{
+  --bg:#0a0a0f;--bg2:#0f0f1a;--bg3:#13131f;--panel:#16161f;--panel2:#1c1c28;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --accent:#7fff6e;--accent2:#4ef0c0;--accent3:#ff6eb4;
+  --text:#e8e8f0;--text2:#8888a8;--text3:#3e3e5a;
+  --shadow:rgba(0,0,0,0.5);
+  --modal-bg:rgba(0,0,0,0.75);--avatar-bg:#1c1c28;
+  --glow1:rgba(127,255,110,0.05);--glow2:rgba(78,240,192,0.05);
+  --grid-ln:rgba(127,255,110,0.025);
+}
+[data-theme="light"]{
+  --bg:#f5f5f0;--bg2:#eeede8;--bg3:#e4e3dc;--panel:#ffffff;--panel2:#f0efe9;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --accent:#2e8b00;--accent2:#0a7a5c;--accent3:#c2185b;
+  --text:#1a1a2e;--text2:#5a5a7a;--text3:#aaaabc;
+  --shadow:rgba(0,0,0,0.12);
+  --modal-bg:rgba(0,0,0,0.45);--avatar-bg:#e8e7e2;
+  --glow1:rgba(46,139,0,0.04);--glow2:rgba(10,122,92,0.04);
+  --grid-ln:rgba(46,139,0,0.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s;padding-bottom:78px;}
 
-  // ══ FIREBASE CONFIG — আপনার নিজের config দিয়ে replace করুন ══
+/* ── BG ── */
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(var(--grid-ln) 1px,transparent 1px),linear-gradient(90deg,var(--grid-ln) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0;animation:gridPan 30s linear infinite;}
+[data-theme="light"] .bg-grid{opacity:.6;}
+@keyframes gridPan{to{background-position:36px 36px;}}
+.bg-glow{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 55% 40% at 15% 10%,var(--glow1) 0%,transparent 65%),radial-gradient(ellipse 45% 35% at 85% 90%,var(--glow2) 0%,transparent 65%);}
+
+.container{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:1.25rem 1rem 2rem;}
+
+/* ── HEADER ── */
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+.logo{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;}
+.logo span{color:var(--accent);}
+.icon-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);cursor:pointer;transition:all .25s;color:var(--text2);font-size:.95rem;}
+.icon-btn:hover{background:var(--panel2);color:var(--text);border-color:var(--accent);}
+.header-right{display:flex;gap:8px;align-items:center;}
+
+/* ── HERO / PROFILE CARD ── */
+.hero{background:var(--panel);border:1.5px solid var(--border2);border-radius:20px;padding:1.75rem 1.5rem;margin-bottom:1.25rem;box-shadow:0 4px 24px var(--shadow);text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,var(--glow1),transparent);pointer-events:none;}
+.avatar-wrap{width:96px;height:96px;border-radius:50%;margin:0 auto .9rem;border:3px solid var(--accent);overflow:hidden;background:var(--avatar-bg);display:flex;align-items:center;justify-content:center;position:relative;}
+.avatar-wrap img{width:100%;height:100%;object-fit:cover;}
+.avatar-wrap i{font-size:2.4rem;color:var(--text3);}
+.hero-name{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:2px;}
+.hero-role{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem;}
+.hero-bio{font-size:.85rem;color:var(--text2);line-height:1.6;max-width:380px;margin:0 auto .9rem;}
+.hero-socials{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+.social-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel2);color:var(--text2);transition:all .2s;text-decoration:none;font-size:.95rem;}
+.social-btn:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-2px);}
+
+/* ── SECTION HEADERS ── */
+.section-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;}
+.section-title i{color:var(--accent);font-size:.95rem;}
+section{margin-bottom:1.5rem;}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:.9rem .8rem;text-align:center;transition:border-color .3s;}
+.stat-value{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--accent);line-height:1;}
+.stat-label{font-family:'Space Mono',monospace;font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-top:5px;}
+
+/* ── SKILLS ── */
+.skills-wrap{display:flex;flex-wrap:wrap;gap:8px;}
+.skill-chip{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.04em;background:var(--panel);border:1px solid var(--border2);border-radius:100px;padding:7px 14px;color:var(--text2);display:flex;align-items:center;gap:6px;transition:all .2s;}
+.skill-chip:hover{border-color:var(--accent);color:var(--text);}
+.skill-chip .lvl-bar{width:30px;height:4px;background:var(--panel2);border-radius:4px;overflow:hidden;}
+.skill-chip .lvl-fill{height:100%;background:var(--accent);}
+
+/* ── PROJECT CARDS ── */
+.project-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px;transition:border-color .25s,transform .25s;box-shadow:0 4px 16px var(--shadow);}
+.project-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.project-img{width:100%;height:150px;object-fit:cover;background:var(--panel2);display:block;}
+.project-img-placeholder{width:100%;height:150px;background:var(--panel2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem;}
+.project-body{padding:1rem 1.1rem;}
+.project-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:4px;}
+.project-desc{font-size:.8rem;color:var(--text2);line-height:1.55;margin-bottom:.7rem;}
+.project-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.8rem;}
+.project-tag{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.06em;background:var(--panel2);border:1px solid var(--border);border-radius:100px;padding:3px 10px;color:var(--text2);}
+.project-links{display:flex;gap:8px;}
+.proj-link{flex:1;text-align:center;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;padding:8px;border-radius:100px;border:1px solid var(--border2);color:var(--text2);text-decoration:none;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.proj-link:hover{border-color:var(--accent);color:var(--accent);}
+.proj-link.primary{background:var(--accent);color:#051200;border-color:var(--accent);font-weight:700;}
+[data-theme="light"] .proj-link.primary{color:#fff;}
+
+/* ── EXPERIENCE TIMELINE ── */
+.timeline{position:relative;padding-left:24px;}
+.timeline::before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--border2);}
+.tl-item{position:relative;margin-bottom:1.1rem;}
+.tl-item::before{content:'';position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--accent);}
+.tl-role{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;}
+.tl-org{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--accent2);margin-top:2px;}
+.tl-date{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--text3);margin-top:2px;letter-spacing:.06em;}
+.tl-desc{font-size:.8rem;color:var(--text2);margin-top:5px;line-height:1.55;}
+
+/* ── CONTACT ── */
+.contact-form{background:var(--panel);border:1px solid var(--border2);border-radius:16px;padding:1.25rem;}
+.form-group{margin-bottom:.8rem;}
+.form-group label{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px;}
+.form-group input,.form-group textarea{width:100%;background:var(--panel2);border:1.5px solid var(--border2);border-radius:12px;padding:.7rem .9rem;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s;resize:vertical;}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent);}
+.btn{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;padding:11px 22px;border-radius:100px;border:1px solid var(--accent);background:var(--accent);color:#051200;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-weight:700;}
+[data-theme="light"] .btn{color:#fff;}
+.btn:hover{box-shadow:0 0 20px rgba(127,255,110,.35);}
+.btn.outline{background:transparent;color:var(--text2);border-color:var(--border2);}
+.btn.outline:hover{color:var(--text);border-color:var(--accent);box-shadow:none;}
+.btn.danger{background:#ff4e6a;border-color:#ff4e6a;color:#fff;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--border2);display:flex;justify-content:space-around;padding:10px 0 calc(10px + env(safe-area-inset-bottom));z-index:200;backdrop-filter:blur(10px);}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:color .2s;background:none;border:none;}
+.nav-item i{font-size:1.1rem;}
+.nav-item.active{color:var(--accent);}
+
+/* ── MODAL (Admin/Login) ── */
+.modal-overlay{position:fixed;inset:0;background:var(--modal-bg);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:20px;padding:1.5rem;max-width:380px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 12px 40px var(--shadow);}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer;}
+
+/* ── ADMIN EDIT BUTTONS ── */
+.edit-fab{position:fixed;bottom:84px;right:16px;width:50px;height:50px;border-radius:50%;background:var(--accent);color:#051200;border:none;font-size:1.2rem;box-shadow:0 6px 20px rgba(127,255,110,.35);z-index:150;cursor:pointer;display:none;align-items:center;justify-content:center;}
+[data-theme="light"] .edit-fab{color:#fff;}
+.edit-fab.show{display:flex;}
+.section-edit-btn{margin-left:auto;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:50%;font-size:.7rem;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.admin-mode .section-edit-btn{display:flex;}
+.admin-mode .section-title{display:flex;align-items:center;}
+
+/* item action buttons shown in admin mode */
+.item-actions{display:none;gap:6px;margin-top:8px;}
+.admin-mode .item-actions{display:flex;}
+.item-actions button{flex:1;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.05em;text-transform:uppercase;padding:6px;border-radius:8px;border:1px solid var(--border2);background:var(--panel2);color:var(--text2);cursor:pointer;}
+.item-actions button:hover{color:var(--text);border-color:var(--accent);}
+.item-actions button.del:hover{color:#ff4e6a;border-color:#ff4e6a;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--accent);border-radius:100px;padding:10px 22px;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--text);box-shadow:0 8px 24px var(--shadow);z-index:1100;opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── LOADING ── */
+.loader{display:flex;align-items:center;justify-content:center;gap:8px;padding:2rem;color:var(--text3);font-family:'Space Mono',monospace;font-size:.7rem;}
+.spin{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:1.5rem;color:var(--text3);font-family:'Space Mono',monospace;font-size:.7rem;border:1px dashed var(--border2);border-radius:14px;}
+
+/* fade in animation */
+.fade-in{animation:fadeIn .5s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">Dev<span>Card</span></div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="toggleTheme()" title="Theme">
+        <i class="fa-solid fa-circle-half-stroke"></i>
+      </button>
+      <button class="icon-btn" id="admin-login-btn" onclick="openAdminModal()" title="Admin">
+        <i class="fa-solid fa-user-shield"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero fade-in" id="hero-section">
+    <div class="avatar-wrap" id="avatar-wrap"><i class="fa-solid fa-user"></i></div>
+    <div class="hero-name" id="hero-name">লোড হচ্ছে...</div>
+    <div class="hero-role" id="hero-role">—</div>
+    <div class="hero-bio" id="hero-bio">—</div>
+    <div class="hero-socials" id="hero-socials"></div>
+    <div class="item-actions" style="max-width:240px;margin:.8rem auto 0;">
+      <button onclick="openProfileEditModal()"><i class="fa-solid fa-pen"></i> এডিট প্রোফাইল</button>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="fade-in">
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card"><div class="stat-value" id="stat-projects">0</div><div class="stat-label">Projects</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-skills">0</div><div class="stat-label">Skills</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-exp">0</div><div class="stat-label">Experience</div></div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="fade-in">
+    <div class="section-title"><i class="fa-solid fa-code"></i> দক্ষতা (Skills)
+      <button class="section-edit-btn" onclick="openSkillModal()"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <div class="skills-wrap" id="skills-wrap"><div class="loader"><i class="fa-solid fa-spinner spin"></i> লোড হচ্ছে...</div></div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="fade-in">
+    <div class="section-title"><i class="fa-solid fa-diagram-project"></i> প্রজেক্ট সমূহ
+      <button class="section-edit-btn" onclick="openProjectModal()"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <div id="projects-wrap"><div class="loader"><i class="fa-solid fa-spinner spin"></i> লোড হচ্ছে...</div></div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="fade-in">
+    <div class="section-title"><i class="fa-solid fa-briefcase"></i> অভিজ্ঞতা
+      <button class="section-edit-btn" onclick="openExpModal()"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <div class="timeline" id="exp-wrap"><div class="loader"><i class="fa-solid fa-spinner spin"></i> লোড হচ্ছে...</div></div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="fade-in" id="contact-section">
+    <div class="section-title"><i class="fa-solid fa-envelope"></i> যোগাযোগ করুন</div>
+    <div class="contact-form">
+      <div class="form-group">
+        <label>আপনার নাম</label>
+        <input type="text" id="msg-name" placeholder="নাম লিখুন">
+      </div>
+      <div class="form-group">
+        <label>ইমেইল</label>
+        <input type="email" id="msg-email" placeholder="email@example.com">
+      </div>
+      <div class="form-group">
+        <label>মেসেজ</label>
+        <textarea id="msg-text" rows="3" placeholder="আপনার মেসেজ লিখুন..."></textarea>
+      </div>
+      <button class="btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i> পাঠান</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-item active" onclick="scrollToSection('hero-section',this)"><i class="fa-solid fa-house"></i>হোম</button>
+  <button class="nav-item" onclick="scrollToSection('skills-wrap',this)"><i class="fa-solid fa-code"></i>স্কিল</button>
+  <button class="nav-item" onclick="scrollToSection('projects-wrap',this)"><i class="fa-solid fa-diagram-project"></i>প্রজেক্ট</button>
+  <button class="nav-item" onclick="scrollToSection('exp-wrap',this)"><i class="fa-solid fa-briefcase"></i>অভিজ্ঞতা</button>
+  <button class="nav-item" onclick="scrollToSection('contact-section',this)"><i class="fa-solid fa-envelope"></i>যোগাযোগ</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ ADMIN LOGIN MODAL ══ -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <div class="modal-title">অ্যাডমিন লগইন <button class="modal-close" onclick="closeModal('admin-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="admin-email" placeholder="admin@example.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="admin-pass" placeholder="••••••••">
+    </div>
+    <button class="btn" onclick="adminLogin()"><i class="fa-solid fa-key"></i> লগইন</button>
+  </div>
+</div>
+
+<!-- ══ PROFILE EDIT MODAL ══ -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal">
+    <div class="modal-title">প্রোফাইল এডিট <button class="modal-close" onclick="closeModal('profile-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group"><label>নাম</label><input type="text" id="pf-name"></div>
+    <div class="form-group"><label>পদবি / Role</label><input type="text" id="pf-role" placeholder="e.g. Full Stack Developer"></div>
+    <div class="form-group"><label>বায়ো</label><textarea id="pf-bio" rows="3"></textarea></div>
+    <div class="form-group"><label>প্রোফাইল ছবি URL</label><input type="text" id="pf-avatar" placeholder="https://..."></div>
+    <div class="form-group"><label>GitHub URL</label><input type="text" id="pf-github" placeholder="https://github.com/..."></div>
+    <div class="form-group"><label>LinkedIn URL</label><input type="text" id="pf-linkedin" placeholder="https://linkedin.com/in/..."></div>
+    <div class="form-group"><label>Facebook URL</label><input type="text" id="pf-facebook" placeholder="https://facebook.com/..."></div>
+    <div class="form-group"><label>Twitter / X URL</label><input type="text" id="pf-twitter" placeholder="https://x.com/..."></div>
+    <div class="form-group"><label>Email</label><input type="text" id="pf-email" placeholder="you@example.com"></div>
+    <div class="form-group"><label>অভিজ্ঞতা (বছর)</label><input type="number" id="pf-exp" placeholder="e.g. 3"></div>
+    <button class="btn" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> সেভ করুন</button>
+  </div>
+</div>
+
+<!-- ══ SKILL MODAL ══ -->
+<div class="modal-overlay" id="skill-modal">
+  <div class="modal">
+    <div class="modal-title">নতুন স্কিল যুক্ত করুন <button class="modal-close" onclick="closeModal('skill-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group"><label>স্কিলের নাম</label><input type="text" id="sk-name" placeholder="e.g. JavaScript"></div>
+    <div class="form-group"><label>লেভেল (%) — ০ থেকে ১০০</label><input type="number" id="sk-level" min="0" max="100" placeholder="80"></div>
+    <button class="btn" onclick="addSkill()"><i class="fa-solid fa-plus"></i> যুক্ত করুন</button>
+  </div>
+</div>
+
+<!-- ══ PROJECT MODAL ══ -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-title">নতুন প্রজেক্ট যুক্ত করুন <button class="modal-close" onclick="closeModal('project-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <input type="hidden" id="pr-id">
+    <div class="form-group"><label>প্রজেক্ট টাইটেল</label><input type="text" id="pr-title" placeholder="e.g. E-commerce App"></div>
+    <div class="form-group"><label>বর্ণনা</label><textarea id="pr-desc" rows="3" placeholder="প্রজেক্ট সম্পর্কে লিখুন..."></textarea></div>
+    <div class="form-group"><label>ছবি URL</label><input type="text" id="pr-image" placeholder="https://..."></div>
+    <div class="form-group"><label>ট্যাগ (কমা দিয়ে আলাদা করুন)</label><input type="text" id="pr-tags" placeholder="React, Firebase, CSS"></div>
+    <div class="form-group"><label>লাইভ ডেমো URL</label><input type="text" id="pr-demo" placeholder="https://..."></div>
+    <div class="form-group"><label>সোর্স কোড URL (GitHub)</label><input type="text" id="pr-code" placeholder="https://github.com/..."></div>
+    <button class="btn" onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> সেভ করুন</button>
+  </div>
+</div>
+
+<!-- ══ EXPERIENCE MODAL ══ -->
+<div class="modal-overlay" id="exp-modal">
+  <div class="modal">
+    <div class="modal-title">অভিজ্ঞতা যুক্ত করুন <button class="modal-close" onclick="closeModal('exp-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <input type="hidden" id="ex-id">
+    <div class="form-group"><label>পদবি</label><input type="text" id="ex-role" placeholder="e.g. Frontend Developer"></div>
+    <div class="form-group"><label>কোম্পানি / প্রতিষ্ঠান</label><input type="text" id="ex-org" placeholder="e.g. ABC Tech Ltd."></div>
+    <div class="form-group"><label>সময়কাল</label><input type="text" id="ex-date" placeholder="e.g. Jan 2023 - বর্তমান"></div>
+    <div class="form-group"><label>বর্ণনা</label><textarea id="ex-desc" rows="3" placeholder="দায়িত্ব ও কাজ সম্পর্কে..."></textarea></div>
+    <button class="btn" onclick="saveExp()"><i class="fa-solid fa-floppy-disk"></i> সেভ করুন</button>
+  </div>
+</div>
+
+<!-- Floating Logout (admin mode) -->
+<button class="edit-fab" id="logout-fab" onclick="adminLogout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+/* ══════════════════ FIREBASE CONFIG ══════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyA_vr4EXR57ap2CRxlS1JpK6wHqIwlU8Rc",
   authDomain: "devcard-6b634.firebaseapp.com",
@@ -23,1225 +355,378 @@ const firebaseConfig = {
   appId: "1:754891867884:web:f6ff7e2f8d2fcf8ae147c9",
   measurementId: "G-C3P4HVH0C0"
 };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-  const storage = getStorage(app);
-  const provider = new GoogleAuthProvider();
+let isAdmin = false;
 
-  // ── Expose to global scope ──
-  window.__fb = { db, auth, storage, provider, signInWithPopup, signOut, onAuthStateChanged,
-    collection, doc, setDoc, getDocs, deleteDoc, onSnapshot, orderBy, query, ref, uploadBytes, getDownloadURL };
-
-  // ── Auth state observer ──
-  onAuthStateChanged(auth, user => {
-    window.currentUser = user;
-    renderAuthUI(user);
-    if (user) loadAllData();
-  });
-</script>
-<style>
-/* ══ CSS VARIABLES ══ */
-:root {
-  --bg:#0a0a0f; --bg2:#0f0f1a; --bg3:#13131f; --panel:#16161f; --panel2:#1c1c28;
-  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
-  --accent:#7fff6e; --accent2:#4ef0c0; --accent3:#ff6eb4;
-  --text:#e8e8f0; --text2:#8888a8; --text3:#3e3e5a;
-  --grid-ln:rgba(127,255,110,0.025);
-  --glow1:rgba(127,255,110,0.06); --glow2:rgba(78,240,192,0.05);
-  --shadow:rgba(0,0,0,0.5);
-  --danger:#ff4e6a; --danger-bg:rgba(255,78,106,0.12);
-  --success-bg:rgba(127,255,110,0.08);
-}
-[data-theme="light"] {
-  --bg:#f5f5f0; --bg2:#eeede8; --bg3:#e4e3dc; --panel:#ffffff; --panel2:#f0efe9;
-  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
-  --accent:#2e8b00; --accent2:#0a7a5c; --accent3:#c2185b;
-  --text:#1a1a2e; --text2:#5a5a7a; --text3:#aaaabc;
-  --grid-ln:rgba(46,139,0,0.05);
-  --glow1:rgba(46,139,0,0.05); --glow2:rgba(10,122,92,0.04);
-  --shadow:rgba(0,0,0,0.12);
-  --danger:#d32f2f; --danger-bg:rgba(211,47,47,0.1);
-  --success-bg:rgba(46,139,0,0.08);
-}
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s;}
-
-/* ── CURSOR ── */
-#cursor{position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:transform .1s;}
-#cursor-ring{position:fixed;width:28px;height:28px;border:1.5px solid var(--accent);border-radius:50%;opacity:.35;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .08s,top .08s;}
-
-/* ── BACKGROUND ── */
-.bg-grid{position:fixed;inset:0;background-image:linear-gradient(var(--grid-ln) 1px,transparent 1px),linear-gradient(90deg,var(--grid-ln) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;animation:gridPan 30s linear infinite;}
-.bg-glow{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 55% 40% at 15% 15%,var(--glow1) 0%,transparent 65%),radial-gradient(ellipse 45% 35% at 85% 85%,var(--glow2) 0%,transparent 65%);}
-@keyframes gridPan{to{background-position:48px 48px;}}
-
-/* ── LAYOUT ── */
-.site-wrap{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh;}
-
-/* ── HEADER ── */
-header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 2rem;}
-.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;gap:1rem;}
-.logo{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;color:var(--text);text-decoration:none;}
-.logo span{color:var(--accent);}
-.logo-tag{font-family:'Space Mono',monospace;font-size:.5rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;}
-
-/* nav */
-nav{display:flex;align-items:center;gap:4px;}
-.nav-link{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;border-radius:100px;color:var(--text2);text-decoration:none;border:none;background:transparent;cursor:pointer;transition:all .2s;}
-.nav-link:hover,.nav-link.active{color:var(--text);background:var(--panel2);}
-.nav-link.active{color:var(--accent);}
-
-/* header right */
-.hdr-right{display:flex;align-items:center;gap:8px;}
-.icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);cursor:pointer;transition:all .2s;color:var(--text2);}
-.icon-btn:hover{background:var(--panel2);color:var(--accent);border-color:var(--accent);}
-.icon-btn svg{width:15px;height:15px;}
-
-/* ── AUTH BUTTONS ── */
-.auth-btn{display:flex;align-items:center;gap:8px;padding:7px 16px;border-radius:100px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;transition:all .2s;white-space:nowrap;}
-.auth-btn:hover{background:var(--panel2);color:var(--text);border-color:var(--accent);}
-.google-icon{width:14px;height:14px;}
-
-/* user menu */
-.user-menu{position:relative;}
-.avatar-btn{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:100px;border:1px solid var(--border2);background:var(--panel);cursor:pointer;transition:all .2s;}
-.avatar-btn:hover{border-color:var(--accent);}
-.avatar-btn img{width:26px;height:26px;border-radius:50%;object-fit:cover;}
-.avatar-btn .uname{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--text2);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.avatar-btn .chev{font-size:.55rem;color:var(--text3);transition:transform .2s;}
-.user-menu.open .chev{transform:rotate(180deg);}
-.dropdown{position:absolute;top:calc(100% + 8px);right:0;width:210px;background:var(--panel);border:1px solid var(--border2);border-radius:16px;padding:8px;z-index:500;display:none;box-shadow:0 8px 32px var(--shadow);animation:dropIn .2s ease;}
-.user-menu.open .dropdown{display:block;}
-@keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-.dd-head{padding:8px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;}
-.dd-name{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;}
-.dd-email{font-family:'Space Mono',monospace;font-size:.55rem;color:var(--text3);margin-top:2px;}
-.dd-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:10px;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);cursor:pointer;transition:all .15s;border:none;background:transparent;width:100%;text-align:left;}
-.dd-item:hover{background:var(--panel2);color:var(--text);}
-.dd-item.danger:hover{background:var(--danger-bg);color:var(--danger);}
-.dd-item svg{width:14px;height:14px;flex-shrink:0;}
-
-/* ── MAIN ── */
-main{flex:1;max-width:1200px;margin:0 auto;width:100%;padding:2rem 1.5rem 5rem;}
-
-/* ── SECTION TABS ── */
-.section-tabs{display:flex;gap:5px;background:var(--panel);border:1px solid var(--border);border-radius:100px;padding:4px;margin-bottom:2rem;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;}
-.section-tabs::-webkit-scrollbar{display:none;}
-.tab-btn{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 18px;border-radius:100px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
-.tab-btn:hover{color:var(--text);background:var(--panel2);}
-.tab-btn.active{background:var(--accent);color:#050505;font-weight:700;}
-
-/* ── SECTIONS ── */
-.section{display:none;}
-.section.active{display:block;animation:fadeUp .3s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-
-/* ── HERO / ABOUT SECTION ── */
-.hero{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;margin-bottom:3rem;}
-.hero-left{}
-.hero-eyebrow{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
-.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent);}
-.hero-name{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:.75rem;}
-.hero-name .accent{color:var(--accent);}
-.hero-tagline{font-size:1.05rem;color:var(--text2);line-height:1.65;margin-bottom:2rem;max-width:400px;}
-.hero-ctas{display:flex;gap:10px;flex-wrap:wrap;}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:100px;background:var(--accent);color:#050505;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:all .2s;}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(127,255,110,.3);}
-.btn-outline{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:100px;background:transparent;color:var(--text2);border:1px solid var(--border2);font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:all .2s;}
-.btn-outline:hover{color:var(--text);border-color:var(--accent);}
-
-/* profile image */
-.hero-right{display:flex;justify-content:center;}
-.profile-frame{position:relative;width:220px;height:220px;}
-.profile-img{width:100%;height:100%;border-radius:24px;object-fit:cover;border:2px solid var(--border2);}
-.profile-img-placeholder{width:100%;height:100%;border-radius:24px;background:var(--panel2);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text3);}
-.profile-frame::before{content:'';position:absolute;inset:-1px;border-radius:25px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));z-index:-1;opacity:.3;}
-.profile-badge{position:absolute;bottom:-12px;right:-12px;background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:8px 14px;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.05em;color:var(--accent);text-transform:uppercase;box-shadow:0 4px 16px var(--shadow);}
-
-/* stats mini */
-.about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:2rem;}
-.about-stat{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:.9rem 1rem;}
-.about-stat-val{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1;}
-.about-stat-lbl{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
-
-/* skills tags */
-.skill-tags{display:flex;flex-wrap:wrap;gap:6px;}
-.skill-tag{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;padding:5px 12px;border-radius:100px;background:var(--success-bg);color:var(--accent);border:1px solid rgba(127,255,110,.18);}
-[data-theme="light"] .skill-tag{border-color:rgba(46,139,0,.2);}
-
-/* ── SECTION HEADER ── */
-.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
-.sec-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;}
-.sec-title span{color:var(--accent);}
-.sec-count{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:var(--text3);background:var(--panel2);padding:4px 10px;border-radius:100px;}
-
-/* ── CARDS GRID ── */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
-
-/* project card */
-.project-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:border-color .2s,transform .2s;cursor:pointer;position:relative;}
-.project-card:hover{border-color:rgba(127,255,110,.3);transform:translateY(-3px);}
-.project-card:hover .card-glow{opacity:1;}
-.card-glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(127,255,110,.04),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none;}
-.card-img{width:100%;height:160px;object-fit:cover;background:var(--panel2);display:block;}
-.card-img-placeholder{width:100%;height:160px;background:linear-gradient(135deg,var(--panel2),var(--bg3));display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
-.card-body{padding:1.25rem;}
-.card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.75rem;}
-.card-tag{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:var(--panel2);color:var(--text3);border:1px solid var(--border);}
-.card-tag.featured{background:rgba(127,255,110,.08);color:var(--accent);border-color:rgba(127,255,110,.18);}
-.card-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.4rem;color:var(--text);}
-.card-desc{font-size:.85rem;color:var(--text2);line-height:1.55;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.card-links{display:flex;gap:8px;}
-.card-link{display:inline-flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:.57rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-decoration:none;padding:5px 10px;border-radius:8px;border:1px solid var(--border);transition:all .15s;}
-.card-link:hover{color:var(--accent);border-color:var(--accent);}
-.card-link svg{width:11px;height:11px;}
-.card-actions{display:flex;gap:6px;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);}
-.card-action{flex:1;padding:6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;}
-.card-action:hover{color:var(--text);background:var(--panel2);}
-.card-action.del:hover{color:var(--danger);border-color:var(--danger);}
-
-/* ── EXPERIENCE / TIMELINE ── */
-.timeline{position:relative;padding-left:2rem;}
-.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--accent),var(--accent2),transparent);}
-.tl-item{position:relative;padding:0 0 2rem 1.5rem;transition:all .2s;}
-.tl-item:last-child{padding-bottom:0;}
-.tl-dot{position:absolute;left:-2.5rem;top:2px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);flex-shrink:0;margin-top:4px;}
-.tl-period{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;}
-.tl-role{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.2rem;}
-.tl-company{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text2);letter-spacing:.05em;margin-bottom:.7rem;}
-.tl-desc{font-size:.88rem;color:var(--text2);line-height:1.6;}
-.tl-actions{display:flex;gap:6px;margin-top:.75rem;}
-.tl-action{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;}
-.tl-action:hover{color:var(--text);background:var(--panel2);}
-.tl-action.del:hover{color:var(--danger);border-color:var(--danger);}
-
-/* ── CONTACT SECTION ── */
-.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;}
-.contact-info h3{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:.75rem;}
-.contact-info p{color:var(--text2);line-height:1.65;margin-bottom:1.5rem;}
-.contact-links{display:flex;flex-direction:column;gap:10px;}
-.contact-link{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px solid var(--border);background:var(--panel);text-decoration:none;color:var(--text2);transition:all .2s;}
-.contact-link:hover{border-color:var(--accent);color:var(--accent);transform:translateX(4px);}
-.contact-link svg{width:16px;height:16px;flex-shrink:0;}
-.contact-link-label{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:2px;}
-.contact-link-val{font-size:.88rem;font-weight:500;}
-
-/* ── FORM ── */
-.form-card{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:1.75rem;}
-.form-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;}
-.form-group{margin-bottom:1rem;}
-.form-label{display:block;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:.5rem;}
-.form-input,.form-textarea,.form-select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;transition:border-color .2s,background .2s;outline:none;}
-.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--accent);background:var(--bg3);}
-.form-textarea{resize:vertical;min-height:100px;}
-.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238888a8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
-.form-select option{background:var(--bg2);}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-
-/* ── MODAL ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s;}
-.modal-overlay.show{opacity:1;pointer-events:all;}
-.modal{background:var(--panel);border:1px solid var(--border2);border-radius:24px;padding:2rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;animation:modalIn .25s ease;position:relative;}
-@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
-.modal-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;}
-.modal-close{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--panel2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .2s;}
-.modal-close:hover{color:var(--danger);border-color:var(--danger);}
-
-/* ── TOAST ── */
-#toast-container{position:fixed;bottom:24px;right:24px;z-index:5000;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
-.toast{background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:10px 16px;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text);box-shadow:0 8px 24px var(--shadow);animation:toastIn .3s ease;display:flex;align-items:center;gap:8px;max-width:280px;}
-.toast.success{border-color:rgba(127,255,110,.3);color:var(--accent);}
-.toast.error{border-color:rgba(255,78,106,.3);color:var(--danger);}
-@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
-@keyframes toastOut{to{opacity:0;transform:translateX(20px);}}
-
-/* ── EMPTY STATE ── */
-.empty-state{text-align:center;padding:4rem 2rem;color:var(--text3);}
-.empty-state svg{width:48px;height:48px;margin-bottom:1rem;opacity:.4;}
-.empty-state h3{font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;color:var(--text2);}
-.empty-state p{font-size:.85rem;line-height:1.6;}
-
-/* ── LOADING ── */
-.loading-dot{display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;animation:dot 1.4s ease-in-out infinite;}
-.loading-dot:nth-child(2){animation-delay:.2s;}
-.loading-dot:nth-child(3){animation-delay:.4s;}
-@keyframes dot{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
-.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* ── ADMIN GATE ── */
-.admin-gate{text-align:center;padding:4rem 2rem;}
-.gate-icon{font-size:3rem;margin-bottom:1rem;}
-.gate-title{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:.5rem;}
-.gate-sub{color:var(--text2);margin-bottom:2rem;line-height:1.6;}
-
-/* ── MOBILE MENU ── */
-.mobile-menu-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);cursor:pointer;color:var(--text2);}
-.mobile-menu-btn svg{width:16px;height:16px;}
-.mobile-nav{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.9);backdrop-filter:blur(20px);}
-.mobile-nav.open{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;animation:fadeUp .2s ease;}
-.mobile-nav-close{position:absolute;top:20px;right:20px;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);}
-.mobile-nav-link{font-family:'Space Mono',monospace;font-size:1rem;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;border-radius:100px;color:var(--text2);text-decoration:none;border:none;background:transparent;cursor:pointer;transition:all .2s;width:200px;text-align:center;}
-.mobile-nav-link:hover,.mobile-nav-link.active{color:var(--accent);background:var(--success-bg);}
-
-/* ── RESPONSIVE ══════════════════════════════════════ */
-@media (max-width:900px){
-  .hero{grid-template-columns:1fr;gap:2rem;text-align:center;}
-  .hero-eyebrow{justify-content:center;}
-  .hero-tagline{margin:0 auto 2rem;}
-  .hero-ctas{justify-content:center;}
-  .hero-right{order:-1;}
-  .contact-grid{grid-template-columns:1fr;}
-}
-@media (max-width:768px){
-  nav{display:none;}
-  .mobile-menu-btn{display:flex;}
-  header{padding:0 1rem;}
-  main{padding:1.5rem 1rem 5rem;}
-  .section-tabs{gap:3px;}
-  .tab-btn{padding:7px 12px;font-size:.55rem;}
-  .cards-grid{grid-template-columns:1fr;}
-  .form-row{grid-template-columns:1fr;}
-  .about-stats{grid-template-columns:repeat(3,1fr);}
-  .hero-name{font-size:2rem;}
-  .modal{border-radius:18px;padding:1.5rem;}
-}
-@media (max-width:480px){
-  .hdr-right .auth-btn span{display:none;}
-  .section-tabs{padding:3px;}
-  .about-stats{grid-template-columns:repeat(3,1fr);gap:6px;}
-  .about-stat{padding:.75rem .6rem;}
-  .about-stat-val{font-size:1.2rem;}
-}
-</style>
-</head>
-<body>
-
-<!-- Custom Cursor -->
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
-
-<!-- Background -->
-<div class="bg-grid"></div>
-<div class="bg-glow"></div>
-
-<!-- Mobile Nav -->
-<div class="mobile-nav" id="mobile-nav">
-  <button class="mobile-nav-close" onclick="closeMobileMenu()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <button class="mobile-nav-link active" onclick="switchTab('about');closeMobileMenu()">About</button>
-  <button class="mobile-nav-link" onclick="switchTab('projects');closeMobileMenu()">Projects</button>
-  <button class="mobile-nav-link" onclick="switchTab('experience');closeMobileMenu()">Experience</button>
-  <button class="mobile-nav-link" onclick="switchTab('contact');closeMobileMenu()">Contact</button>
-</div>
-
-<!-- Site Wrap -->
-<div class="site-wrap">
-
-<!-- HEADER -->
-<header>
-  <div class="header-inner">
-    <div>
-      <a href="#" class="logo" onclick="switchTab('about')">Port<span>folio</span></a>
-      <div class="logo-tag">Dynamic · Firebase</div>
-    </div>
-
-    <nav>
-      <button class="nav-link active" onclick="switchTab('about')" data-tab="about">About</button>
-      <button class="nav-link" onclick="switchTab('projects')" data-tab="projects">Projects</button>
-      <button class="nav-link" onclick="switchTab('experience')" data-tab="experience">Experience</button>
-      <button class="nav-link" onclick="switchTab('contact')" data-tab="contact">Contact</button>
-    </nav>
-
-    <div class="hdr-right">
-      <!-- Theme Toggle -->
-      <button class="icon-btn" onclick="toggleTheme()" title="Theme toggle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
-      <!-- Mobile Menu -->
-      <button class="mobile-menu-btn" onclick="openMobileMenu()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <!-- Auth UI (injected here) -->
-      <div id="auth-area"></div>
-    </div>
-  </div>
-</header>
-
-<!-- MAIN -->
-<main>
-
-  <!-- SECTION TABS -->
-  <div class="section-tabs">
-    <button class="tab-btn active" onclick="switchTab('about')" data-tab="about">About</button>
-    <button class="tab-btn" onclick="switchTab('projects')" data-tab="projects">Projects</button>
-    <button class="tab-btn" onclick="switchTab('experience')" data-tab="experience">Experience</button>
-    <button class="tab-btn" onclick="switchTab('contact')" data-tab="contact">Contact</button>
-    <button class="tab-btn" id="admin-tab-btn" style="display:none;" onclick="switchTab('admin')">Admin Panel</button>
-  </div>
-
-  <!-- ═══ ABOUT SECTION ═══ -->
-  <div class="section active" id="sec-about">
-    <div class="hero">
-      <div class="hero-left">
-        <div class="hero-eyebrow">Available for work</div>
-        <h1 class="hero-name" id="hero-name">Your <span class="accent">Name</span></h1>
-        <p class="hero-tagline" id="hero-tagline">Full-stack developer & designer crafting beautiful digital experiences with modern web technologies.</p>
-        <div class="hero-ctas">
-          <a class="btn-primary" onclick="switchTab('projects')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            View Projects
-          </a>
-          <a class="btn-outline" onclick="switchTab('contact')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Hire Me
-          </a>
-        </div>
-      </div>
-      <div class="hero-right">
-        <div class="profile-frame">
-          <div id="profile-img-container">
-            <div class="profile-img-placeholder">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-              <span style="font-family:'Space Mono',monospace;font-size:.55rem;color:var(--text3);letter-spacing:.08em;">PHOTO</span>
-            </div>
-          </div>
-          <div class="profile-badge" id="profile-badge">Open to work</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="about-stats" id="about-stats">
-      <div class="about-stat">
-        <div class="about-stat-val" id="stat-projects">0</div>
-        <div class="about-stat-lbl">Projects</div>
-      </div>
-      <div class="about-stat">
-        <div class="about-stat-val" id="stat-exp">0</div>
-        <div class="about-stat-lbl">Yrs Exp</div>
-      </div>
-      <div class="about-stat">
-        <div class="about-stat-val" id="stat-clients">0</div>
-        <div class="about-stat-lbl">Clients</div>
-      </div>
-    </div>
-
-    <!-- Skills -->
-    <div style="margin-bottom:2rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:.75rem;">Skills & Tools</div>
-      <div class="skill-tags" id="skill-tags-container">
-        <span class="skill-tag">Loading...</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ PROJECTS SECTION ═══ -->
-  <div class="section" id="sec-projects">
-    <div class="sec-header">
-      <h2 class="sec-title">My <span>Projects</span></h2>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="sec-count" id="projects-count">0 Projects</span>
-        <button class="btn-primary" id="add-project-btn" style="display:none;" onclick="openProjectModal()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Project
-        </button>
-      </div>
-    </div>
-    <div class="cards-grid" id="projects-container">
-      <div class="empty-state" style="grid-column:1/-1;">
-        <div style="display:flex;gap:5px;justify-content:center;margin-bottom:1rem;">
-          <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
-        </div>
-        <p>Loading projects...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ EXPERIENCE SECTION ═══ -->
-  <div class="section" id="sec-experience">
-    <div class="sec-header">
-      <h2 class="sec-title">Work <span>Experience</span></h2>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="sec-count" id="exp-count">0 Roles</span>
-        <button class="btn-primary" id="add-exp-btn" style="display:none;" onclick="openExpModal()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Role
-        </button>
-      </div>
-    </div>
-    <div class="timeline" id="experience-container">
-      <div class="empty-state" style="padding-left:0;">
-        <div style="display:flex;gap:5px;justify-content:center;margin-bottom:1rem;">
-          <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
-        </div>
-        <p>Loading experience...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ CONTACT SECTION ═══ -->
-  <div class="section" id="sec-contact">
-    <div class="contact-grid">
-      <div class="contact-info">
-        <h3>Let's <span style="color:var(--accent)">Connect</span></h3>
-        <p id="contact-intro">I'm always open to discussing new projects, creative ideas or opportunities to be part of your vision.</p>
-        <div class="contact-links" id="contact-links-container">
-          <a class="contact-link" id="contact-email" href="#">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <div><span class="contact-link-label">Email</span><span class="contact-link-val" id="cl-email">your@email.com</span></div>
-          </a>
-          <a class="contact-link" id="contact-github" href="#" target="_blank">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-            <div><span class="contact-link-label">GitHub</span><span class="contact-link-val" id="cl-github">github.com/username</span></div>
-          </a>
-          <a class="contact-link" id="contact-linkedin" href="#" target="_blank">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-            <div><span class="contact-link-label">LinkedIn</span><span class="contact-link-val" id="cl-linkedin">linkedin.com/in/username</span></div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Message Form -->
-      <div class="form-card">
-        <div class="form-title">Send a Message</div>
-        <div class="form-group">
-          <label class="form-label">Your Name</label>
-          <input class="form-input" id="msg-name" type="text" placeholder="John Doe">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input class="form-input" id="msg-email" type="email" placeholder="john@email.com">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Message</label>
-          <textarea class="form-textarea" id="msg-text" placeholder="Hi, I'd like to discuss..."></textarea>
-        </div>
-        <button class="btn-primary" style="width:100%;justify-content:center;" onclick="sendMessage()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Send Message
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ ADMIN SECTION ═══ -->
-  <div class="section" id="sec-admin">
-    <div id="admin-gate">
-      <div class="admin-gate">
-        <div class="gate-icon">🔐</div>
-        <div class="gate-title">Admin Panel</div>
-        <div class="gate-sub">Sign in with Google to manage your portfolio content.</div>
-        <button class="auth-btn" onclick="signIn()">
-          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Sign in with Google
-        </button>
-      </div>
-    </div>
-    <div id="admin-content" style="display:none;">
-      <div class="sec-header">
-        <h2 class="sec-title">Admin <span>Panel</span></h2>
-        <span class="sec-count" id="admin-user-name">Admin</span>
-      </div>
-
-      <!-- Profile Settings -->
-      <div style="background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:1.75rem;margin-bottom:1.5rem;">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--accent);">👤</span> Profile Settings
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Your Name</label>
-            <input class="form-input" id="admin-name" placeholder="Your Full Name">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Title / Role</label>
-            <input class="form-input" id="admin-title" placeholder="Full-stack Developer">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tagline</label>
-          <textarea class="form-textarea" id="admin-tagline" style="min-height:70px;" placeholder="Craft a compelling one-liner..."></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Years of Experience</label>
-            <input class="form-input" id="admin-exp-years" type="number" placeholder="3">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Clients / Projects Done</label>
-            <input class="form-input" id="admin-clients" type="number" placeholder="20">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Skills (comma separated)</label>
-          <input class="form-input" id="admin-skills" placeholder="React, Firebase, Node.js, Figma...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Status Badge</label>
-          <input class="form-input" id="admin-badge" placeholder="Open to work">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Profile Photo URL</label>
-          <input class="form-input" id="admin-photo" placeholder="https://...">
-        </div>
-        <button class="btn-primary" onclick="saveProfile()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Save Profile
-        </button>
-      </div>
-
-      <!-- Contact Settings -->
-      <div style="background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:1.75rem;margin-bottom:1.5rem;">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--accent2);">🔗</span> Contact & Social
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input class="form-input" id="admin-email" type="email" placeholder="you@email.com">
-          </div>
-          <div class="form-group">
-            <label class="form-label">GitHub URL</label>
-            <input class="form-input" id="admin-github" placeholder="https://github.com/...">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">LinkedIn URL</label>
-          <input class="form-input" id="admin-linkedin" placeholder="https://linkedin.com/in/...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Contact Intro Text</label>
-          <textarea class="form-textarea" id="admin-contact-intro" style="min-height:70px;" placeholder="I'm always open to..."></textarea>
-        </div>
-        <button class="btn-primary" onclick="saveContact()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Save Contact
-        </button>
-      </div>
-
-      <!-- Messages inbox -->
-      <div style="background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:1.75rem;">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--accent3);">💬</span> Messages Inbox
-        </div>
-        <div id="messages-container">
-          <div class="empty-state"><p>No messages yet.</p></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</main>
-</div><!-- end site-wrap -->
-
-<!-- Toast Container -->
-<div id="toast-container"></div>
-
-<!-- ═══ PROJECT MODAL ═══ -->
-<div class="modal-overlay" id="project-modal">
-  <div class="modal">
-    <div class="modal-title">
-      <span id="project-modal-title">Add Project</span>
-      <button class="modal-close" onclick="closeProjectModal()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <input type="hidden" id="project-id">
-    <div class="form-group">
-      <label class="form-label">Project Title *</label>
-      <input class="form-input" id="p-title" placeholder="My Awesome Project">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Description *</label>
-      <textarea class="form-textarea" id="p-desc" placeholder="What does this project do?"></textarea>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Tech Tags (comma sep)</label>
-        <input class="form-input" id="p-tags" placeholder="React, Firebase, Tailwind">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Category</label>
-        <select class="form-select" id="p-category">
-          <option value="Web App">Web App</option>
-          <option value="Mobile">Mobile</option>
-          <option value="Design">Design</option>
-          <option value="Open Source">Open Source</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Live URL</label>
-        <input class="form-input" id="p-live" type="url" placeholder="https://...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">GitHub URL</label>
-        <input class="form-input" id="p-github" type="url" placeholder="https://github.com/...">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cover Image URL</label>
-      <input class="form-input" id="p-img" type="url" placeholder="https://...">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Emoji Icon</label>
-      <input class="form-input" id="p-emoji" placeholder="🚀" maxlength="4">
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
-      <input type="checkbox" id="p-featured" style="width:16px;height:16px;accent-color:var(--accent);">
-      <label for="p-featured" style="font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);">Featured Project</label>
-    </div>
-    <button class="btn-primary" style="width:100%;justify-content:center;" onclick="saveProject()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
-      Save Project
-    </button>
-  </div>
-</div>
-
-<!-- ═══ EXPERIENCE MODAL ═══ -->
-<div class="modal-overlay" id="exp-modal">
-  <div class="modal">
-    <div class="modal-title">
-      <span id="exp-modal-title">Add Experience</span>
-      <button class="modal-close" onclick="closeExpModal()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <input type="hidden" id="exp-id">
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Job Title *</label>
-        <input class="form-input" id="e-role" placeholder="Frontend Developer">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Company *</label>
-        <input class="form-input" id="e-company" placeholder="Acme Corp">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Start Date</label>
-        <input class="form-input" id="e-start" placeholder="Jan 2022">
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Date</label>
-        <input class="form-input" id="e-end" placeholder="Present">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Description</label>
-      <textarea class="form-textarea" id="e-desc" placeholder="What did you work on?"></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Skills Used (comma sep)</label>
-      <input class="form-input" id="e-skills" placeholder="React, Node.js, AWS">
-    </div>
-    <button class="btn-primary" style="width:100%;justify-content:center;" onclick="saveExperience()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
-      Save Experience
-    </button>
-  </div>
-</div>
-
-<script>
-// ══════════════════════════════════════════════
-//  CURSOR
-// ══════════════════════════════════════════════
-const cur = document.getElementById('cursor');
-const curR = document.getElementById('cursor-ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
-(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(animRing);})();
-document.addEventListener('mousedown',()=>cur.style.transform='translate(-50%,-50%) scale(1.6)');
-document.addEventListener('mouseup',()=>cur.style.transform='translate(-50%,-50%) scale(1)');
-
-// ══════════════════════════════════════════════
-//  THEME
-// ══════════════════════════════════════════════
+/* ══════════════════ THEME ══════════════════ */
 function toggleTheme(){
-  const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',t);
-  localStorage.setItem('portfolio-theme',t);
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('devcard-theme', next);
 }
-const savedTheme = localStorage.getItem('portfolio-theme');
-if(savedTheme) document.documentElement.setAttribute('data-theme',savedTheme);
+(function(){
+  const saved = localStorage.getItem('devcard-theme');
+  if(saved) document.documentElement.setAttribute('data-theme', saved);
+})();
 
-// ══════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════
-function switchTab(tab){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn,.nav-link,.mobile-nav-link').forEach(b=>{
-    b.classList.toggle('active', b.dataset.tab===tab || b.textContent.toLowerCase().includes(tab));
-  });
-  const sec = document.getElementById('sec-'+tab);
-  if(sec) sec.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// ══════════════════════════════════════════════
-//  MOBILE NAV
-// ══════════════════════════════════════════════
-function openMobileMenu(){ document.getElementById('mobile-nav').classList.add('open'); }
-function closeMobileMenu(){ document.getElementById('mobile-nav').classList.remove('open'); }
-
-// ══════════════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════════════
-function showToast(msg, type='success', dur=3000){
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = (type==='success'?'✓':type==='error'?'✕':'ℹ') + ' ' + msg;
-  document.getElementById('toast-container').appendChild(t);
-  setTimeout(()=>{t.style.animation='toastOut .3s ease forwards';setTimeout(()=>t.remove(),300);},dur);
+/* ══════════════════ TOAST ══════════════════ */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-// ══════════════════════════════════════════════
-//  FIREBASE AUTH UI
-// ══════════════════════════════════════════════
-function renderAuthUI(user){
-  const area = document.getElementById('auth-area');
-  const adminTab = document.getElementById('admin-tab-btn');
-  if(!user){
-    area.innerHTML = `<button class="auth-btn" onclick="signIn()">
-      <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      <span>Admin</span>
-    </button>`;
-    adminTab.style.display='none';
-    document.getElementById('admin-gate').style.display='block';
-    document.getElementById('admin-content').style.display='none';
-  } else {
-    area.innerHTML = `<div class="user-menu" id="user-menu-wrap">
-      <div class="avatar-btn" onclick="toggleDropdown()">
-        <img src="${user.photoURL||''}" alt="${user.displayName}" onerror="this.style.display='none'">
-        <span class="uname">${user.displayName?.split(' ')[0]||'Admin'}</span>
-        <span class="chev">▾</span>
-      </div>
-      <div class="dropdown">
-        <div class="dd-head">
-          <div class="dd-name">${user.displayName||'Admin'}</div>
-          <div class="dd-email">${user.email}</div>
-        </div>
-        <button class="dd-item" onclick="switchTab('admin');toggleDropdown()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Admin Panel
-        </button>
-        <button class="dd-item danger" onclick="signOutUser()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign Out
-        </button>
-      </div>
-    </div>`;
-    adminTab.style.display='';
-    document.getElementById('admin-gate').style.display='none';
-    document.getElementById('admin-content').style.display='block';
-    document.getElementById('admin-user-name').textContent = user.displayName||'Admin';
-  }
-}
+/* ══════════════════ MODALS ══════════════════ */
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function openModal(id){ document.getElementById(id).classList.add('show'); }
 
-function toggleDropdown(){
-  document.getElementById('user-menu-wrap')?.classList.toggle('open');
-}
-document.addEventListener('click',e=>{
-  const m = document.getElementById('user-menu-wrap');
-  if(m && !m.contains(e.target)) m.classList.remove('open');
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('show'); });
 });
 
-async function signIn(){
-  try{
-    await window.__fb.signInWithPopup(window.__fb.auth, window.__fb.provider);
-    showToast('Signed in successfully!');
-  } catch(e){ showToast('Sign in failed: '+e.message,'error'); }
-}
-async function signOutUser(){
-  await window.__fb.signOut(window.__fb.auth);
-  showToast('Signed out.','success');
+/* ══════════════════ NAV SCROLL ══════════════════ */
+function scrollToSection(id, btn){
+  document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  btn.classList.add('active');
 }
 
-// ══════════════════════════════════════════════
-//  LOAD ALL DATA
-// ══════════════════════════════════════════════
-async function loadAllData(){
-  await Promise.all([loadProfile(), loadProjects(), loadExperience(), loadContact(), loadMessages()]);
+/* ══════════════════ ADMIN AUTH ══════════════════ */
+const ADMIN_BTN = document.getElementById('admin-login-btn');
+
+function openAdminModal(){
+  if(isAdmin){ adminLogout(); return; }
+  openModal('admin-modal');
 }
 
-// ── PROFILE ──
-let profileData = {};
-async function loadProfile(){
-  const {db, doc, getDocs, collection} = window.__fb;
-  try{
-    const snap = await getDocs(collection(db,'settings'));
-    snap.forEach(d=>{ if(d.id==='profile') profileData={...d.data()}; });
-    renderProfile();
-    populateAdminProfile();
-  } catch(e){ console.warn('Profile load:',e); }
+function adminLogin(){
+  const email = document.getElementById('admin-email').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  if(!email || !pass){ showToast('ইমেইল ও পাসওয়ার্ড দিন'); return; }
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(()=>{
+      closeModal('admin-modal');
+      showToast('লগইন সফল ✅');
+    })
+    .catch(err=>{
+      // If user doesn't exist yet, create it as first-time admin setup
+      if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential'){
+        auth.createUserWithEmailAndPassword(email, pass)
+          .then(()=>{ closeModal('admin-modal'); showToast('অ্যাডমিন একাউন্ট তৈরি হয়েছে ✅'); })
+          .catch(e2=>showToast('এরর: '+e2.message));
+      } else {
+        showToast('এরর: '+err.message);
+      }
+    });
 }
-function renderProfile(){
-  const p = profileData;
-  if(p.name){ 
-    document.getElementById('hero-name').innerHTML = p.name.split(' ').length>1
-      ? p.name.split(' ').slice(0,-1).join(' ')+' <span class="accent">'+p.name.split(' ').slice(-1)+'</span>'
-      : '<span class="accent">'+p.name+'</span>';
-  }
-  if(p.tagline) document.getElementById('hero-tagline').textContent = p.tagline;
-  if(p.badge) document.getElementById('profile-badge').textContent = p.badge;
-  if(p.photo){
-    document.getElementById('profile-img-container').innerHTML = `<img class="profile-img" src="${p.photo}" alt="Profile" onerror="this.parentNode.innerHTML='<div class=\\'profile-img-placeholder\\'><svg width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><circle cx=\\'12\\' cy=\\'8\\' r=\\'4\\'/><path d=\\'M4 20c0-4 3.6-7 8-7s8 3 8 7\\'/></svg></div>'">`;
-  }
-  if(p.skills){
-    const tags = p.skills.split(',').map(s=>s.trim()).filter(Boolean);
-    document.getElementById('skill-tags-container').innerHTML = tags.map(t=>`<span class="skill-tag">${t}</span>`).join('');
-  }
-  if(p.expYears) document.getElementById('stat-exp').textContent = p.expYears+'+';
-  if(p.clients) document.getElementById('stat-clients').textContent = p.clients+'+';
+
+function adminLogout(){
+  auth.signOut().then(()=>showToast('লগআউট হয়েছে'));
 }
-function populateAdminProfile(){
-  const p = profileData;
-  if(p.name) document.getElementById('admin-name').value = p.name||'';
-  if(p.title) document.getElementById('admin-title').value = p.title||'';
-  if(p.tagline) document.getElementById('admin-tagline').value = p.tagline||'';
-  if(p.expYears) document.getElementById('admin-exp-years').value = p.expYears||'';
-  if(p.clients) document.getElementById('admin-clients').value = p.clients||'';
-  if(p.skills) document.getElementById('admin-skills').value = p.skills||'';
-  if(p.badge) document.getElementById('admin-badge').value = p.badge||'';
-  if(p.photo) document.getElementById('admin-photo').value = p.photo||'';
+
+auth.onAuthStateChanged(user=>{
+  isAdmin = !!user;
+  document.body.classList.toggle('admin-mode', isAdmin);
+  document.getElementById('logout-fab').classList.toggle('show', isAdmin);
+  ADMIN_BTN.innerHTML = isAdmin ? '<i class="fa-solid fa-lock-open"></i>' : '<i class="fa-solid fa-user-shield"></i>';
+  ADMIN_BTN.title = isAdmin ? 'Admin mode (click to logout)' : 'Admin login';
+});
+
+/* ══════════════════ PROFILE ══════════════════ */
+const profileRef = db.ref('profile');
+
+profileRef.on('value', snap=>{
+  const d = snap.val() || {};
+  document.getElementById('hero-name').textContent = d.name || 'আপনার নাম';
+  document.getElementById('hero-role').textContent = d.role || 'Your Role / Title';
+  document.getElementById('hero-bio').textContent = d.bio || 'এডিট করে আপনার পরিচিতি লিখুন।';
+  document.getElementById('stat-exp').textContent = (d.experience || 0) + '+';
+
+  const avatarWrap = document.getElementById('avatar-wrap');
+  avatarWrap.innerHTML = d.avatar
+    ? `<img src="${escapeHtml(d.avatar)}" alt="avatar">`
+    : `<i class="fa-solid fa-user"></i>`;
+
+  const socials = [];
+  if(d.github) socials.push({icon:'fa-brands fa-github', url:d.github});
+  if(d.linkedin) socials.push({icon:'fa-brands fa-linkedin-in', url:d.linkedin});
+  if(d.facebook) socials.push({icon:'fa-brands fa-facebook-f', url:d.facebook});
+  if(d.twitter) socials.push({icon:'fa-brands fa-x-twitter', url:d.twitter});
+  if(d.email) socials.push({icon:'fa-solid fa-envelope', url:'mailto:'+d.email});
+
+  document.getElementById('hero-socials').innerHTML = socials.map(s=>
+    `<a class="social-btn" href="${escapeAttr(s.url)}" target="_blank" rel="noopener"><i class="${s.icon}"></i></a>`
+  ).join('') || '<span style="font-family:\'Space Mono\',monospace;font-size:.6rem;color:var(--text3);">সোশ্যাল লিংক যুক্ত করুন</span>';
+
+  // store for edit modal
+  window._profileData = d;
+});
+
+function openProfileEditModal(){
+  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
+  const d = window._profileData || {};
+  document.getElementById('pf-name').value = d.name || '';
+  document.getElementById('pf-role').value = d.role || '';
+  document.getElementById('pf-bio').value = d.bio || '';
+  document.getElementById('pf-avatar').value = d.avatar || '';
+  document.getElementById('pf-github').value = d.github || '';
+  document.getElementById('pf-linkedin').value = d.linkedin || '';
+  document.getElementById('pf-facebook').value = d.facebook || '';
+  document.getElementById('pf-twitter').value = d.twitter || '';
+  document.getElementById('pf-email').value = d.email || '';
+  document.getElementById('pf-exp').value = d.experience || '';
+  openModal('profile-modal');
 }
-async function saveProfile(){
-  if(!window.currentUser) return showToast('Please sign in first','error');
-  const {db,doc,setDoc} = window.__fb;
+
+function saveProfile(){
   const data = {
-    name: document.getElementById('admin-name').value.trim(),
-    title: document.getElementById('admin-title').value.trim(),
-    tagline: document.getElementById('admin-tagline').value.trim(),
-    expYears: document.getElementById('admin-exp-years').value.trim(),
-    clients: document.getElementById('admin-clients').value.trim(),
-    skills: document.getElementById('admin-skills').value.trim(),
-    badge: document.getElementById('admin-badge').value.trim(),
-    photo: document.getElementById('admin-photo').value.trim(),
-    updatedAt: new Date().toISOString()
+    name: document.getElementById('pf-name').value.trim(),
+    role: document.getElementById('pf-role').value.trim(),
+    bio: document.getElementById('pf-bio').value.trim(),
+    avatar: document.getElementById('pf-avatar').value.trim(),
+    github: document.getElementById('pf-github').value.trim(),
+    linkedin: document.getElementById('pf-linkedin').value.trim(),
+    facebook: document.getElementById('pf-facebook').value.trim(),
+    twitter: document.getElementById('pf-twitter').value.trim(),
+    email: document.getElementById('pf-email').value.trim(),
+    experience: parseInt(document.getElementById('pf-exp').value) || 0
   };
-  try{
-    await setDoc(doc(db,'settings','profile'), data);
-    profileData = data;
-    renderProfile();
-    showToast('Profile saved!');
-  } catch(e){ showToast('Error: '+e.message,'error'); }
+  profileRef.set(data)
+    .then(()=>{ closeModal('profile-modal'); showToast('প্রোফাইল সেভ হয়েছে ✅'); })
+    .catch(e=>showToast('এরর: '+e.message));
 }
 
-// ── CONTACT ──
-let contactData = {};
-async function loadContact(){
-  const {db, getDocs, collection} = window.__fb;
-  try{
-    const snap = await getDocs(collection(db,'settings'));
-    snap.forEach(d=>{ if(d.id==='contact') contactData={...d.data()}; });
-    renderContact();
-    populateAdminContact();
-  } catch(e){ console.warn('Contact load:',e); }
-}
-function renderContact(){
-  const c = contactData;
-  if(c.email){
-    document.getElementById('cl-email').textContent = c.email;
-    document.getElementById('contact-email').href = 'mailto:'+c.email;
+/* ══════════════════ SKILLS ══════════════════ */
+const skillsRef = db.ref('skills');
+
+skillsRef.on('value', snap=>{
+  const wrap = document.getElementById('skills-wrap');
+  const items = snap.val();
+  if(!items){
+    wrap.innerHTML = `<div class="empty-state">কোনো স্কিল যুক্ত করা হয়নি</div>`;
+    document.getElementById('stat-skills').textContent = '0';
+    return;
   }
-  if(c.github){
-    document.getElementById('cl-github').textContent = c.github.replace('https://','');
-    document.getElementById('contact-github').href = c.github;
-  }
-  if(c.linkedin){
-    document.getElementById('cl-linkedin').textContent = c.linkedin.replace('https://','');
-    document.getElementById('contact-linkedin').href = c.linkedin;
-  }
-  if(c.intro) document.getElementById('contact-intro').textContent = c.intro;
-}
-function populateAdminContact(){
-  const c = contactData;
-  document.getElementById('admin-email').value = c.email||'';
-  document.getElementById('admin-github').value = c.github||'';
-  document.getElementById('admin-linkedin').value = c.linkedin||'';
-  document.getElementById('admin-contact-intro').value = c.intro||'';
-}
-async function saveContact(){
-  if(!window.currentUser) return showToast('Please sign in','error');
-  const {db,doc,setDoc} = window.__fb;
-  const data = {
-    email: document.getElementById('admin-email').value.trim(),
-    github: document.getElementById('admin-github').value.trim(),
-    linkedin: document.getElementById('admin-linkedin').value.trim(),
-    intro: document.getElementById('admin-contact-intro').value.trim(),
-  };
-  try{
-    await setDoc(doc(db,'settings','contact'), data);
-    contactData = data;
-    renderContact();
-    showToast('Contact saved!');
-  } catch(e){ showToast('Error: '+e.message,'error'); }
+  const keys = Object.keys(items);
+  document.getElementById('stat-skills').textContent = keys.length;
+  wrap.innerHTML = keys.map(k=>{
+    const s = items[k];
+    return `<div class="skill-chip">
+      <span>${escapeHtml(s.name)}</span>
+      <div class="lvl-bar"><div class="lvl-fill" style="width:${s.level||50}%"></div></div>
+      <span style="color:var(--text3);font-size:.6rem;">${s.level||50}%</span>
+      ${isAdmin ? `<button onclick="deleteSkill('${k}')" style="background:none;border:none;color:var(--text3);cursor:pointer;margin-left:4px;"><i class="fa-solid fa-xmark"></i></button>` : ''}
+    </div>`;
+  }).join('');
+});
+
+function openSkillModal(){
+  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
+  document.getElementById('sk-name').value = '';
+  document.getElementById('sk-level').value = '';
+  openModal('skill-modal');
 }
 
-// ── PROJECTS ──
-let projects = [];
-async function loadProjects(){
-  const {db, collection, query, orderBy, onSnapshot} = window.__fb;
-  const q = query(collection(db,'projects'), orderBy('createdAt','desc'));
-  onSnapshot(q, snap=>{
-    projects = snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderProjects();
-    document.getElementById('stat-projects').textContent = projects.length;
-    document.getElementById('projects-count').textContent = projects.length+' Project'+(projects.length!==1?'s':'');
-  }, e=>{ renderProjectsEmpty(); console.warn(e); });
+function addSkill(){
+  const name = document.getElementById('sk-name').value.trim();
+  const level = Math.max(0, Math.min(100, parseInt(document.getElementById('sk-level').value) || 50));
+  if(!name){ showToast('স্কিলের নাম দিন'); return; }
+  skillsRef.push({name, level})
+    .then(()=>{ closeModal('skill-modal'); showToast('স্কিল যুক্ত হয়েছে ✅'); })
+    .catch(e=>showToast('এরর: '+e.message));
 }
-function renderProjects(){
-  const c = document.getElementById('projects-container');
-  const isAdmin = !!window.currentUser;
-  document.getElementById('add-project-btn').style.display = isAdmin?'':'none';
-  if(!projects.length){
-    c.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      <h3>No projects yet</h3>
-      <p>Projects added from admin panel will appear here.</p>
-    </div>`; return;
+
+function deleteSkill(key){
+  if(!confirm('এই স্কিল ডিলিট করবেন?')) return;
+  skillsRef.child(key).remove().then(()=>showToast('ডিলিট হয়েছে'));
+}
+
+/* ══════════════════ PROJECTS ══════════════════ */
+const projectsRef = db.ref('projects');
+
+projectsRef.on('value', snap=>{
+  const wrap = document.getElementById('projects-wrap');
+  const items = snap.val();
+  if(!items){
+    wrap.innerHTML = `<div class="empty-state">কোনো প্রজেক্ট যুক্ত করা হয়নি</div>`;
+    document.getElementById('stat-projects').textContent = '0';
+    return;
   }
-  c.innerHTML = projects.map(p=>`
-    <div class="project-card">
-      <div class="card-glow"></div>
-      ${p.img ? `<img class="card-img" src="${p.img}" alt="${p.title}" loading="lazy">` : `<div class="card-img-placeholder">${p.emoji||'🚀'}</div>`}
-      <div class="card-body">
-        <div class="card-tags">
-          ${p.featured?`<span class="card-tag featured">Featured</span>`:''}
-          <span class="card-tag">${p.category||'Project'}</span>
-          ${(p.tags||'').split(',').slice(0,3).map(t=>`<span class="card-tag">${t.trim()}</span>`).join('')}
+  const keys = Object.keys(items);
+  document.getElementById('stat-projects').textContent = keys.length;
+  wrap.innerHTML = keys.map(k=>{
+    const p = items[k];
+    const tags = (p.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+    return `<div class="project-card fade-in">
+      ${p.image ? `<img class="project-img" src="${escapeHtml(p.image)}" alt="${escapeAttr(p.title)}">` : `<div class="project-img-placeholder"><i class="fa-solid fa-image"></i></div>`}
+      <div class="project-body">
+        <div class="project-title">${escapeHtml(p.title)}</div>
+        <div class="project-desc">${escapeHtml(p.desc||'')}</div>
+        ${tags.length ? `<div class="project-tags">${tags.map(t=>`<span class="project-tag">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+        <div class="project-links">
+          ${p.demo ? `<a class="proj-link primary" href="${escapeAttr(p.demo)}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo</a>` : ''}
+          ${p.code ? `<a class="proj-link" href="${escapeAttr(p.code)}" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> Code</a>` : ''}
         </div>
-        <div class="card-title">${p.title}</div>
-        <div class="card-desc">${p.desc}</div>
-        <div class="card-links">
-          ${p.live?`<a class="card-link" href="${p.live}" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Live</a>`:''}
-          ${p.github?`<a class="card-link" href="${p.github}" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>GitHub</a>`:''}
+        <div class="item-actions">
+          <button onclick="editProject('${k}')"><i class="fa-solid fa-pen"></i> এডিট</button>
+          <button class="del" onclick="deleteProject('${k}')"><i class="fa-solid fa-trash"></i> ডিলিট</button>
         </div>
-        ${isAdmin?`<div class="card-actions">
-          <button class="card-action" onclick="editProject('${p.id}')">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit
-          </button>
-          <button class="card-action del" onclick="deleteProject('${p.id}')">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-            Delete
-          </button>
-        </div>`:''}
       </div>
-    </div>`).join('');
-}
-function renderProjectsEmpty(){
-  document.getElementById('projects-container').innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><p>Failed to load projects.</p></div>`;
+    </div>`;
+  }).join('');
+});
+
+let _projectsCache = {};
+projectsRef.on('value', snap=>{ _projectsCache = snap.val() || {}; });
+
+function openProjectModal(){
+  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
+  document.getElementById('pr-id').value = '';
+  document.getElementById('pr-title').value = '';
+  document.getElementById('pr-desc').value = '';
+  document.getElementById('pr-image').value = '';
+  document.getElementById('pr-tags').value = '';
+  document.getElementById('pr-demo').value = '';
+  document.getElementById('pr-code').value = '';
+  openModal('project-modal');
 }
 
-function openProjectModal(){ document.getElementById('project-modal').classList.add('show'); }
-function closeProjectModal(){ document.getElementById('project-modal').classList.remove('show'); clearProjectForm(); }
-function clearProjectForm(){
-  ['project-id','p-title','p-desc','p-tags','p-live','p-github','p-img','p-emoji'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('p-category').value='Web App';
-  document.getElementById('p-featured').checked=false;
-  document.getElementById('project-modal-title').textContent='Add Project';
+function editProject(key){
+  if(!isAdmin) return;
+  const p = _projectsCache[key];
+  if(!p) return;
+  document.getElementById('pr-id').value = key;
+  document.getElementById('pr-title').value = p.title || '';
+  document.getElementById('pr-desc').value = p.desc || '';
+  document.getElementById('pr-image').value = p.image || '';
+  document.getElementById('pr-tags').value = p.tags || '';
+  document.getElementById('pr-demo').value = p.demo || '';
+  document.getElementById('pr-code').value = p.code || '';
+  openModal('project-modal');
 }
-function editProject(id){
-  const p = projects.find(x=>x.id===id); if(!p) return;
-  document.getElementById('project-id').value = id;
-  document.getElementById('p-title').value = p.title||'';
-  document.getElementById('p-desc').value = p.desc||'';
-  document.getElementById('p-tags').value = p.tags||'';
-  document.getElementById('p-live').value = p.live||'';
-  document.getElementById('p-github').value = p.github||'';
-  document.getElementById('p-img').value = p.img||'';
-  document.getElementById('p-emoji').value = p.emoji||'';
-  document.getElementById('p-category').value = p.category||'Web App';
-  document.getElementById('p-featured').checked = p.featured||false;
-  document.getElementById('project-modal-title').textContent='Edit Project';
-  openProjectModal();
-}
-async function saveProject(){
-  if(!window.currentUser) return showToast('Please sign in','error');
-  const {db,doc,setDoc,collection} = window.__fb;
-  const title = document.getElementById('p-title').value.trim();
-  const desc = document.getElementById('p-desc').value.trim();
-  if(!title||!desc) return showToast('Title & description required','error');
-  const id = document.getElementById('project-id').value || Date.now().toString();
+
+function saveProject(){
+  const id = document.getElementById('pr-id').value;
   const data = {
-    title, desc,
-    tags: document.getElementById('p-tags').value.trim(),
-    category: document.getElementById('p-category').value,
-    live: document.getElementById('p-live').value.trim(),
-    github: document.getElementById('p-github').value.trim(),
-    img: document.getElementById('p-img').value.trim(),
-    emoji: document.getElementById('p-emoji').value.trim()||'🚀',
-    featured: document.getElementById('p-featured').checked,
-    createdAt: document.getElementById('project-id').value ? (projects.find(p=>p.id===id)?.createdAt||new Date().toISOString()) : new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    title: document.getElementById('pr-title').value.trim(),
+    desc: document.getElementById('pr-desc').value.trim(),
+    image: document.getElementById('pr-image').value.trim(),
+    tags: document.getElementById('pr-tags').value.trim(),
+    demo: document.getElementById('pr-demo').value.trim(),
+    code: document.getElementById('pr-code').value.trim()
   };
-  try{
-    await setDoc(doc(db,'projects',id), data);
-    showToast('Project saved!');
-    closeProjectModal();
-  } catch(e){ showToast('Error: '+e.message,'error'); }
-}
-async function deleteProject(id){
-  if(!confirm('Delete this project?')) return;
-  const {db,doc,deleteDoc} = window.__fb;
-  try{ await deleteDoc(doc(db,'projects',id)); showToast('Project deleted'); }
-  catch(e){ showToast('Error: '+e.message,'error'); }
+  if(!data.title){ showToast('প্রজেক্ট টাইটেল দিন'); return; }
+  const ref = id ? projectsRef.child(id) : projectsRef.push();
+  ref.set(data)
+    .then(()=>{ closeModal('project-modal'); showToast('প্রজেক্ট সেভ হয়েছে ✅'); })
+    .catch(e=>showToast('এরর: '+e.message));
 }
 
-// ── EXPERIENCE ──
-let experiences = [];
-async function loadExperience(){
-  const {db, collection, query, orderBy, onSnapshot} = window.__fb;
-  const q = query(collection(db,'experience'), orderBy('createdAt','desc'));
-  onSnapshot(q, snap=>{
-    experiences = snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderExperience();
-    document.getElementById('exp-count').textContent = experiences.length+' Role'+(experiences.length!==1?'s':'');
-  }, e=>{ console.warn(e); });
+function deleteProject(key){
+  if(!confirm('এই প্রজেক্ট ডিলিট করবেন?')) return;
+  projectsRef.child(key).remove().then(()=>showToast('ডিলিট হয়েছে'));
 }
-function renderExperience(){
-  const c = document.getElementById('experience-container');
-  const isAdmin = !!window.currentUser;
-  document.getElementById('add-exp-btn').style.display = isAdmin?'':'none';
-  if(!experiences.length){
-    c.innerHTML = `<div class="empty-state" style="padding:4rem 2rem;text-align:center;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;opacity:.4;margin-bottom:1rem;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;color:var(--text2);">No experience yet</h3>
-      <p style="font-size:.85rem;color:var(--text3);">Work history will appear here.</p>
-    </div>`; return;
+
+/* ══════════════════ EXPERIENCE ══════════════════ */
+const expRef = db.ref('experience');
+let _expCache = {};
+
+expRef.on('value', snap=>{
+  const wrap = document.getElementById('exp-wrap');
+  const items = snap.val();
+  _expCache = items || {};
+  if(!items){
+    wrap.innerHTML = `<div class="empty-state">কোনো অভিজ্ঞতা যুক্ত করা হয়নি</div>`;
+    return;
   }
-  c.innerHTML = experiences.map(e=>`
-    <div class="tl-item">
-      <div class="tl-dot"></div>
-      <div class="tl-period">${e.start||''}${e.end?' — '+e.end:''}</div>
-      <div class="tl-role">${e.role}</div>
-      <div class="tl-company">${e.company}</div>
-      <div class="tl-desc">${e.desc||''}</div>
-      ${e.skills?`<div class="skill-tags" style="margin-top:.6rem;">${e.skills.split(',').map(s=>`<span class="skill-tag">${s.trim()}</span>`).join('')}</div>`:''}
-      ${isAdmin?`<div class="tl-actions">
-        <button class="tl-action" onclick="editExperience('${e.id}')">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
-        </button>
-        <button class="tl-action del" onclick="deleteExperience('${e.id}')">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Delete
-        </button>
-      </div>`:''}
-    </div>`).join('');
+  // sort by order added (keys), most recent first if there's a date field — just reverse insertion order
+  const keys = Object.keys(items).reverse();
+  wrap.innerHTML = keys.map(k=>{
+    const e = items[k];
+    return `<div class="tl-item fade-in">
+      <div class="tl-role">${escapeHtml(e.role)}</div>
+      <div class="tl-org">${escapeHtml(e.org||'')}</div>
+      <div class="tl-date">${escapeHtml(e.date||'')}</div>
+      <div class="tl-desc">${escapeHtml(e.desc||'')}</div>
+      <div class="item-actions">
+        <button onclick="editExp('${k}')"><i class="fa-solid fa-pen"></i> এডিট</button>
+        <button class="del" onclick="deleteExp('${k}')"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+      </div>
+    </div>`;
+  }).join('');
+});
+
+function openExpModal(){
+  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
+  document.getElementById('ex-id').value = '';
+  document.getElementById('ex-role').value = '';
+  document.getElementById('ex-org').value = '';
+  document.getElementById('ex-date').value = '';
+  document.getElementById('ex-desc').value = '';
+  openModal('exp-modal');
 }
 
-function openExpModal(){ document.getElementById('exp-modal').classList.add('show'); }
-function closeExpModal(){ document.getElementById('exp-modal').classList.remove('show'); clearExpForm(); }
-function clearExpForm(){
-  ['exp-id','e-role','e-company','e-start','e-end','e-desc','e-skills'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('exp-modal-title').textContent='Add Experience';
+function editExp(key){
+  if(!isAdmin) return;
+  const e = _expCache[key];
+  if(!e) return;
+  document.getElementById('ex-id').value = key;
+  document.getElementById('ex-role').value = e.role || '';
+  document.getElementById('ex-org').value = e.org || '';
+  document.getElementById('ex-date').value = e.date || '';
+  document.getElementById('ex-desc').value = e.desc || '';
+  openModal('exp-modal');
 }
-function editExperience(id){
-  const e = experiences.find(x=>x.id===id); if(!e) return;
-  document.getElementById('exp-id').value=id;
-  document.getElementById('e-role').value=e.role||'';
-  document.getElementById('e-company').value=e.company||'';
-  document.getElementById('e-start').value=e.start||'';
-  document.getElementById('e-end').value=e.end||'';
-  document.getElementById('e-desc').value=e.desc||'';
-  document.getElementById('e-skills').value=e.skills||'';
-  document.getElementById('exp-modal-title').textContent='Edit Experience';
-  openExpModal();
-}
-async function saveExperience(){
-  if(!window.currentUser) return showToast('Please sign in','error');
-  const {db,doc,setDoc} = window.__fb;
-  const role = document.getElementById('e-role').value.trim();
-  const company = document.getElementById('e-company').value.trim();
-  if(!role||!company) return showToast('Role & company required','error');
-  const id = document.getElementById('exp-id').value || Date.now().toString();
+
+function saveExp(){
+  const id = document.getElementById('ex-id').value;
   const data = {
-    role, company,
-    start: document.getElementById('e-start').value.trim(),
-    end: document.getElementById('e-end').value.trim(),
-    desc: document.getElementById('e-desc').value.trim(),
-    skills: document.getElementById('e-skills').value.trim(),
-    createdAt: document.getElementById('exp-id').value ? (experiences.find(e=>e.id===id)?.createdAt||new Date().toISOString()) : new Date().toISOString(),
+    role: document.getElementById('ex-role').value.trim(),
+    org: document.getElementById('ex-org').value.trim(),
+    date: document.getElementById('ex-date').value.trim(),
+    desc: document.getElementById('ex-desc').value.trim()
   };
-  try{
-    await setDoc(doc(db,'experience',id),data);
-    showToast('Experience saved!');
-    closeExpModal();
-  } catch(e){ showToast('Error: '+e.message,'error'); }
-}
-async function deleteExperience(id){
-  if(!confirm('Delete this experience?')) return;
-  const {db,doc,deleteDoc} = window.__fb;
-  try{ await deleteDoc(doc(db,'experience',id)); showToast('Deleted'); }
-  catch(e){ showToast('Error: '+e.message,'error'); }
+  if(!data.role){ showToast('পদবি দিন'); return; }
+  const ref = id ? expRef.child(id) : expRef.push();
+  ref.set(data)
+    .then(()=>{ closeModal('exp-modal'); showToast('সেভ হয়েছে ✅'); })
+    .catch(e=>showToast('এরর: '+e.message));
 }
 
-// ── MESSAGES ──
-async function sendMessage(){
+function deleteExp(key){
+  if(!confirm('এই অভিজ্ঞতা ডিলিট করবেন?')) return;
+  expRef.child(key).remove().then(()=>showToast('ডিলিট হয়েছে'));
+}
+
+/* ══════════════════ CONTACT MESSAGES ══════════════════ */
+function sendMessage(){
   const name = document.getElementById('msg-name').value.trim();
   const email = document.getElementById('msg-email').value.trim();
   const text = document.getElementById('msg-text').value.trim();
-  if(!name||!email||!text) return showToast('All fields required','error');
-  const {db,doc,setDoc} = window.__fb;
-  try{
-    await setDoc(doc(db,'messages',Date.now().toString()), {name,email,text,sentAt:new Date().toISOString(),read:false});
-    document.getElementById('msg-name').value='';
-    document.getElementById('msg-email').value='';
-    document.getElementById('msg-text').value='';
-    showToast('Message sent! 🎉');
-  } catch(e){ showToast('Error: '+e.message,'error'); }
-}
-async function loadMessages(){
-  const {db, collection, query, orderBy, onSnapshot} = window.__fb;
-  if(!window.currentUser) return;
-  const q = query(collection(db,'messages'), orderBy('sentAt','desc'));
-  onSnapshot(q, snap=>{
-    const msgs = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const c = document.getElementById('messages-container');
-    if(!msgs.length){ c.innerHTML=`<div class="empty-state"><p>No messages yet.</p></div>`; return; }
-    c.innerHTML = msgs.map(m=>`
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:.75rem;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
-          <div>
-            <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;">${m.name}</span>
-            <span style="font-family:'Space Mono',monospace;font-size:.55rem;color:var(--text3);margin-left:8px;">${m.email}</span>
-          </div>
-          <span style="font-family:'Space Mono',monospace;font-size:.52rem;color:var(--text3);">${new Date(m.sentAt).toLocaleDateString()}</span>
-        </div>
-        <p style="font-size:.85rem;color:var(--text2);line-height:1.5;">${m.text}</p>
-      </div>`).join('');
-  });
+  if(!name || !email || !text){ showToast('সব ফিল্ড পূরণ করুন'); return; }
+  db.ref('messages').push({
+    name, email, text, time: new Date().toISOString()
+  }).then(()=>{
+    showToast('মেসেজ পাঠানো হয়েছে ✅');
+    document.getElementById('msg-name').value = '';
+    document.getElementById('msg-email').value = '';
+    document.getElementById('msg-text').value = '';
+  }).catch(e=>showToast('এরর: '+e.message));
 }
 
-// ── CLOSE MODALS ON OUTSIDE CLICK ──
-document.getElementById('project-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeProjectModal(); });
-document.getElementById('exp-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeExpModal(); });
-
-// ── KEYBOARD SHORTCUTS ──
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ closeProjectModal(); closeExpModal(); }
-});
-
-// ── INIT (demo data if Firebase not configured yet) ──
-window.addEventListener('load',()=>{
-  // Show placeholder data if Firebase isn't configured
-  setTimeout(()=>{
-    if(!window.__fb) return;
-    const skillEl = document.getElementById('skill-tags-container');
-    if(skillEl.querySelector('.skill-tag')?.textContent==='Loading...'){
-      skillEl.innerHTML = ['React','Next.js','Firebase','Node.js','TypeScript','Figma','TailwindCSS','Python'].map(s=>`<span class="skill-tag">${s}</span>`).join('');
-    }
-  }, 3000);
-});
+/* ══════════════════ UTILS ══════════════════ */
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
 </script>
 </body>
 </html>
