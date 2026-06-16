@@ -3,165 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>DevCard — Dynamic Portfolio</title>
+<title>DevCard — Ibrahim Khalil</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* ══ THEMES (matched to TypeForge) ══ */
 [data-theme="dark"]{
-  --bg:#0a0a0f;--bg2:#0f0f1a;--bg3:#13131f;--panel:#16161f;--panel2:#1c1c28;
+  --bg:#0a0a0f;--bg2:#0f0f1a;--panel:#16161f;--panel2:#1c1c28;
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --accent:#7fff6e;--accent2:#4ef0c0;--accent3:#ff6eb4;
+  --accent:#7fff6e;--accent2:#4ef0c0;
   --text:#e8e8f0;--text2:#8888a8;--text3:#3e3e5a;
-  --shadow:rgba(0,0,0,0.5);
-  --modal-bg:rgba(0,0,0,0.75);--avatar-bg:#1c1c28;
+  --shadow:rgba(0,0,0,0.5);--modal-bg:rgba(0,0,0,0.75);--avatar-bg:#1c1c28;
   --glow1:rgba(127,255,110,0.05);--glow2:rgba(78,240,192,0.05);
   --grid-ln:rgba(127,255,110,0.025);
 }
 [data-theme="light"]{
-  --bg:#f5f5f0;--bg2:#eeede8;--bg3:#e4e3dc;--panel:#ffffff;--panel2:#f0efe9;
+  --bg:#f0f2f5;--bg2:#e4e6ea;--panel:#ffffff;--panel2:#f0f2f5;
   --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
-  --accent:#2e8b00;--accent2:#0a7a5c;--accent3:#c2185b;
-  --text:#1a1a2e;--text2:#5a5a7a;--text3:#aaaabc;
-  --shadow:rgba(0,0,0,0.12);
-  --modal-bg:rgba(0,0,0,0.45);--avatar-bg:#e8e7e2;
-  --glow1:rgba(46,139,0,0.04);--glow2:rgba(10,122,92,0.04);
-  --grid-ln:rgba(46,139,0,0.05);
+  --accent:#1877f2;--accent2:#0a7a5c;
+  --text:#1c1e21;--text2:#65676b;--text3:#aaaabc;
+  --shadow:rgba(0,0,0,0.12);--modal-bg:rgba(0,0,0,0.45);--avatar-bg:#e4e6ea;
+  --glow1:rgba(24,119,242,0.04);--glow2:rgba(10,122,92,0.04);
+  --grid-ln:rgba(24,119,242,0.05);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s;padding-bottom:78px;}
-
-/* ── BG ── */
 .bg-grid{position:fixed;inset:0;background-image:linear-gradient(var(--grid-ln) 1px,transparent 1px),linear-gradient(90deg,var(--grid-ln) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0;animation:gridPan 30s linear infinite;}
-[data-theme="light"] .bg-grid{opacity:.6;}
 @keyframes gridPan{to{background-position:36px 36px;}}
 .bg-glow{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 55% 40% at 15% 10%,var(--glow1) 0%,transparent 65%),radial-gradient(ellipse 45% 35% at 85% 90%,var(--glow2) 0%,transparent 65%);}
+.container{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:0 0 2rem;}
 
-.container{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:1.25rem 1rem 2rem;}
-
-/* ── HEADER ── */
-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
-.logo{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;}
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;position:sticky;top:0;z-index:100;background:var(--panel);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);}
+.logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;}
 .logo span{color:var(--accent);}
-.icon-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);cursor:pointer;transition:all .25s;color:var(--text2);font-size:.95rem;}
-.icon-btn:hover{background:var(--panel2);color:var(--text);border-color:var(--accent);}
+.icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--panel2);cursor:pointer;transition:all .25s;color:var(--text2);font-size:.9rem;}
+.icon-btn:hover{color:var(--text);border-color:var(--accent);}
 .header-right{display:flex;gap:8px;align-items:center;}
 
-/* ── HERO / PROFILE CARD ── */
-.hero{background:var(--panel);border:1.5px solid var(--border2);border-radius:20px;padding:1.75rem 1.5rem;margin-bottom:1.25rem;box-shadow:0 4px 24px var(--shadow);text-align:center;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,var(--glow1),transparent);pointer-events:none;}
-.avatar-wrap{width:96px;height:96px;border-radius:50%;margin:0 auto .9rem;border:3px solid var(--accent);overflow:hidden;background:var(--avatar-bg);display:flex;align-items:center;justify-content:center;position:relative;}
-.avatar-wrap img{width:100%;height:100%;object-fit:cover;}
-.avatar-wrap i{font-size:2.4rem;color:var(--text3);}
-.hero-name{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:2px;}
-.hero-role{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem;}
-.hero-bio{font-size:.85rem;color:var(--text2);line-height:1.6;max-width:380px;margin:0 auto .9rem;}
-.hero-socials{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
-.social-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel2);color:var(--text2);transition:all .2s;text-decoration:none;font-size:.95rem;}
-.social-btn:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-2px);}
+/* FB PROFILE CARD */
+.fb-profile-card{background:var(--panel);margin-bottom:10px;box-shadow:0 2px 8px var(--shadow);}
 
-/* ── SECTION HEADERS ── */
-.section-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;}
-.section-title i{color:var(--accent);font-size:.95rem;}
-section{margin-bottom:1.5rem;}
+/* Cover */
+.cover-photo-wrap{position:relative;width:100%;height:200px;overflow:hidden;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);}
+[data-theme="light"] .cover-photo-wrap{background:linear-gradient(135deg,#bbdefb 0%,#90caf9 100%);}
+.cover-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.cover-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.35);z-index:1;}
+.cover-name-badge{position:absolute;bottom:12px;left:16px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.8);z-index:2;}
+.cover-name-badge h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;}
+.cover-name-badge p{font-size:.73rem;opacity:.85;font-family:'Space Mono',monospace;}
+.cover-edit-btn{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.72rem;cursor:pointer;display:none;align-items:center;gap:5px;z-index:2;}
+.admin-mode .cover-edit-btn{display:flex;}
 
-/* ── STATS ROW ── */
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
-.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:.9rem .8rem;text-align:center;transition:border-color .3s;}
-.stat-value{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--accent);line-height:1;}
-.stat-label{font-family:'Space Mono',monospace;font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-top:5px;}
+/* Avatar row */
+.fb-avatar-row{display:flex;align-items:flex-end;justify-content:space-between;padding:0 1rem;margin-top:-44px;margin-bottom:.7rem;}
+.fb-avatar-wrap{position:relative;width:90px;height:90px;flex-shrink:0;}
+.av-img{width:90px;height:90px;border-radius:50%;border:4px solid var(--panel);background:var(--avatar-bg);object-fit:cover;display:block;}
+.av-icon{width:90px;height:90px;border-radius:50%;border:4px solid var(--panel);background:var(--avatar-bg);display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--text3);}
+.online-dot{width:14px;height:14px;background:#42b72a;border-radius:50%;border:3px solid var(--panel);position:absolute;bottom:4px;right:4px;}
+.av-cam{position:absolute;bottom:2px;right:2px;width:26px;height:26px;background:var(--panel2);border:2px solid var(--panel);border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:.62rem;color:var(--text2);}
+.admin-mode .av-cam{display:flex;}
+.fb-action-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1;padding-left:10px;padding-top:50px;}
+.fb-btn{font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap;}
+.fb-btn.primary{background:var(--accent);color:#fff;}
+[data-theme="dark"] .fb-btn.primary{color:#051200;}
+.fb-btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border2);}
+.fb-btn:hover{filter:brightness(1.08);}
 
-/* ── SKILLS ── */
-.skills-wrap{display:flex;flex-wrap:wrap;gap:8px;}
-.skill-chip{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.04em;background:var(--panel);border:1px solid var(--border2);border-radius:100px;padding:7px 14px;color:var(--text2);display:flex;align-items:center;gap:6px;transition:all .2s;}
-.skill-chip:hover{border-color:var(--accent);color:var(--text);}
-.skill-chip .lvl-bar{width:30px;height:4px;background:var(--panel2);border-radius:4px;overflow:hidden;}
-.skill-chip .lvl-fill{height:100%;background:var(--accent);}
+/* Profile info */
+.fb-profile-info{padding:.2rem 1rem .9rem;}
+.fb-name{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:2px;display:flex;align-items:center;gap:5px;}
+.verified{color:var(--accent);font-size:.9rem;}
+.fb-role{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;}
+.fb-bio{font-size:.87rem;color:var(--text2);line-height:1.55;margin-bottom:.7rem;}
+.vibe-bubble{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1.5px solid var(--border2);border-radius:20px 20px 20px 4px;padding:7px 14px;font-size:.82rem;color:var(--text2);margin-bottom:.7rem;}
+.vibe-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 5px var(--accent);flex-shrink:0;}
+.vibe-edit-area{display:none;gap:8px;margin-bottom:.7rem;align-items:center;}
+.admin-mode .vibe-edit-area{display:flex;}
+.vibe-edit-area input{flex:1;background:var(--panel2);border:1.5px solid var(--border2);border-radius:100px;padding:7px 14px;font-size:.82rem;color:var(--text);outline:none;}
+.vibe-edit-area input:focus{border-color:var(--accent);}
+.vibe-save-btn{background:var(--accent);color:#051200;border:none;border-radius:100px;padding:7px 14px;font-size:.72rem;font-family:'Space Mono',monospace;cursor:pointer;white-space:nowrap;}
+.fb-meta{display:flex;flex-wrap:wrap;gap:.35rem .7rem;margin-bottom:.7rem;}
+.fb-meta-item{display:flex;align-items:center;gap:5px;font-size:.79rem;color:var(--text2);}
+.fb-meta-item i{color:var(--text3);width:14px;text-align:center;}
+.fb-meta-item a{color:var(--accent2);text-decoration:none;}
+.fb-stats{display:flex;gap:.8rem;padding:.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+.fb-stat{text-align:center;flex:1;}
+.fb-stat-num{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text);}
+.fb-stat-lbl{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:2px;}
+.fb-socials{display:flex;gap:7px;flex-wrap:wrap;}
+.fb-social-link{display:flex;align-items:center;gap:6px;font-size:.77rem;color:var(--text2);text-decoration:none;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;transition:all .2s;}
+.fb-social-link:hover{color:var(--accent);border-color:var(--accent);}
 
-/* ── PROJECT CARDS ── */
-.project-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px;transition:border-color .25s,transform .25s;box-shadow:0 4px 16px var(--shadow);}
-.project-card:hover{border-color:var(--accent);transform:translateY(-2px);}
-.project-img{width:100%;height:150px;object-fit:cover;background:var(--panel2);display:block;}
-.project-img-placeholder{width:100%;height:150px;background:var(--panel2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem;}
-.project-body{padding:1rem 1.1rem;}
-.project-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:4px;}
-.project-desc{font-size:.8rem;color:var(--text2);line-height:1.55;margin-bottom:.7rem;}
-.project-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.8rem;}
-.project-tag{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.06em;background:var(--panel2);border:1px solid var(--border);border-radius:100px;padding:3px 10px;color:var(--text2);}
-.project-links{display:flex;gap:8px;}
-.proj-link{flex:1;text-align:center;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;padding:8px;border-radius:100px;border:1px solid var(--border2);color:var(--text2);text-decoration:none;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.proj-link:hover{border-color:var(--accent);color:var(--accent);}
-.proj-link.primary{background:var(--accent);color:#051200;border-color:var(--accent);font-weight:700;}
-[data-theme="light"] .proj-link.primary{color:#fff;}
-
-/* ── EXPERIENCE TIMELINE ── */
-.timeline{position:relative;padding-left:24px;}
-.timeline::before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--border2);}
-.tl-item{position:relative;margin-bottom:1.1rem;}
-.tl-item::before{content:'';position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--accent);}
-.tl-role{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;}
-.tl-org{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--accent2);margin-top:2px;}
-.tl-date{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--text3);margin-top:2px;letter-spacing:.06em;}
-.tl-desc{font-size:.8rem;color:var(--text2);margin-top:5px;line-height:1.55;}
-
-/* ── CONTACT ── */
-.contact-form{background:var(--panel);border:1px solid var(--border2);border-radius:16px;padding:1.25rem;}
-.form-group{margin-bottom:.8rem;}
-.form-group label{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px;}
-.form-group input,.form-group textarea{width:100%;background:var(--panel2);border:1.5px solid var(--border2);border-radius:12px;padding:.7rem .9rem;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s;resize:vertical;}
-.form-group input:focus,.form-group textarea:focus{border-color:var(--accent);}
-.btn{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;padding:11px 22px;border-radius:100px;border:1px solid var(--accent);background:var(--accent);color:#051200;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-weight:700;}
-[data-theme="light"] .btn{color:#fff;}
-.btn:hover{box-shadow:0 0 20px rgba(127,255,110,.35);}
-.btn.outline{background:transparent;color:var(--text2);border-color:var(--border2);}
-.btn.outline:hover{color:var(--text);border-color:var(--accent);box-shadow:none;}
-.btn.danger{background:#ff4e6a;border-color:#ff4e6a;color:#fff;}
-
-/* ── BOTTOM NAV ── */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--border2);display:flex;justify-content:space-around;padding:10px 0 calc(10px + env(safe-area-inset-bottom));z-index:200;backdrop-filter:blur(10px);}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:color .2s;background:none;border:none;}
-.nav-item i{font-size:1.1rem;}
-.nav-item.active{color:var(--accent);}
-
-/* ── MODAL (Admin/Login) ── */
-.modal-overlay{position:fixed;inset:0;background:var(--modal-bg);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem;}
-.modal-overlay.show{opacity:1;pointer-events:all;}
-.modal{background:var(--panel);border:1px solid var(--border2);border-radius:20px;padding:1.5rem;max-width:380px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 12px 40px var(--shadow);}
-.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
-.modal-close{background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer;}
-
-/* ── ADMIN EDIT BUTTONS ── */
-.edit-fab{position:fixed;bottom:84px;right:16px;width:50px;height:50px;border-radius:50%;background:var(--accent);color:#051200;border:none;font-size:1.2rem;box-shadow:0 6px 20px rgba(127,255,110,.35);z-index:150;cursor:pointer;display:none;align-items:center;justify-content:center;}
-[data-theme="light"] .edit-fab{color:#fff;}
-.edit-fab.show{display:flex;}
-.section-edit-btn{margin-left:auto;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:50%;font-size:.7rem;cursor:pointer;display:none;align-items:center;justify-content:center;}
+/* SECTIONS */
+section{margin-bottom:10px;background:var(--panel);padding:1.1rem 1rem;box-shadow:0 1px 4px var(--shadow);}
+.section-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;}
+.section-title i{color:var(--accent);}
+.section-edit-btn{margin-left:auto;background:var(--panel2);border:1px solid var(--border2);color:var(--text2);width:26px;height:26px;border-radius:50%;font-size:.65rem;cursor:pointer;display:none;align-items:center;justify-content:center;}
 .admin-mode .section-edit-btn{display:flex;}
 .admin-mode .section-title{display:flex;align-items:center;}
 
-/* item action buttons shown in admin mode */
+/* SKILLS */
+.skills-wrap{display:flex;flex-wrap:wrap;gap:8px;}
+.skill-chip{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.04em;background:var(--panel2);border:1px solid var(--border2);border-radius:100px;padding:7px 14px;color:var(--text2);display:flex;align-items:center;gap:6px;}
+.skill-chip:hover{border-color:var(--accent);color:var(--text);}
+.lvl-bar{width:30px;height:4px;background:var(--panel);border-radius:4px;overflow:hidden;}
+.lvl-fill{height:100%;background:var(--accent);}
+
+/* PROJECTS */
+.project-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;transition:border-color .25s,transform .2s;}
+.project-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.project-img{width:100%;height:140px;object-fit:cover;display:block;}
+.project-img-placeholder{width:100%;height:140px;background:var(--panel);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem;}
+.project-body{padding:.9rem 1rem;}
+.project-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:3px;}
+.project-desc{font-size:.78rem;color:var(--text2);line-height:1.5;margin-bottom:.6rem;}
+.project-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.6rem;}
+.project-tag{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.05em;background:var(--panel);border:1px solid var(--border);border-radius:100px;padding:3px 10px;color:var(--text2);}
+.project-links{display:flex;gap:7px;}
+.proj-link{flex:1;text-align:center;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;padding:7px;border-radius:8px;border:1px solid var(--border2);color:var(--text2);text-decoration:none;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.proj-link:hover{border-color:var(--accent);color:var(--accent);}
+.proj-link.primary{background:var(--accent);color:#051200;border-color:var(--accent);font-weight:700;}
+
+/* EXPERIENCE */
+.timeline{position:relative;padding-left:24px;}
+.timeline::before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--border2);}
+.tl-item{position:relative;margin-bottom:1.1rem;}
+.tl-item::before{content:'';position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);}
+.tl-role{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;}
+.tl-org{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--accent2);margin-top:2px;}
+.tl-date{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--text3);margin-top:2px;}
+.tl-desc{font-size:.8rem;color:var(--text2);margin-top:5px;line-height:1.5;}
+
+/* CONTACT */
+.contact-form{background:var(--panel2);border:1px solid var(--border2);border-radius:12px;padding:1rem;}
+.form-group{margin-bottom:.8rem;}
+.form-group label{font-family:'Space Mono',monospace;font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:5px;}
+.form-group input,.form-group textarea{width:100%;background:var(--panel);border:1.5px solid var(--border2);border-radius:10px;padding:.65rem .85rem;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s;resize:vertical;}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent);}
+.btn{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;padding:11px 22px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#051200;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-weight:700;}
+[data-theme="light"] .btn{color:#fff;}
+.btn:hover{box-shadow:0 0 16px rgba(127,255,110,.3);}
+.btn.outline{background:transparent;color:var(--text2);border-color:var(--border2);}
+.btn.danger{background:#ff4e6a;border-color:#ff4e6a;color:#fff;}
+.btn.google-btn{background:#fff;color:#333;border-color:#dadce0;font-family:'DM Sans',sans-serif;font-size:.9rem;text-transform:none;letter-spacing:0;padding:12px 20px;}
+.btn.google-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.google-icon{width:20px;height:20px;flex-shrink:0;}
+
+/* ITEM ACTIONS */
 .item-actions{display:none;gap:6px;margin-top:8px;}
 .admin-mode .item-actions{display:flex;}
-.item-actions button{flex:1;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.05em;text-transform:uppercase;padding:6px;border-radius:8px;border:1px solid var(--border2);background:var(--panel2);color:var(--text2);cursor:pointer;}
+.item-actions button{flex:1;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.04em;text-transform:uppercase;padding:6px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer;}
 .item-actions button:hover{color:var(--text);border-color:var(--accent);}
 .item-actions button.del:hover{color:#ff4e6a;border-color:#ff4e6a;}
 
-/* ── TOAST ── */
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--border2);display:flex;justify-content:space-around;padding:10px 0 calc(10px + env(safe-area-inset-bottom));z-index:200;backdrop-filter:blur(10px);}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-family:'Space Mono',monospace;font-size:.51rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:color .2s;background:none;border:none;}
+.nav-item i{font-size:1rem;}
+.nav-item.active{color:var(--accent);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:var(--modal-bg);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:18px;padding:1.5rem;max-width:380px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 12px 40px var(--shadow);}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer;}
+
+/* LOGIN MODAL */
+.login-center{text-align:center;}
+.login-logo{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:.3rem;}
+.login-logo span{color:var(--accent);}
+.login-sub{color:var(--text2);font-size:.82rem;margin-bottom:1.2rem;}
+.or-div{display:flex;align-items:center;gap:.7rem;margin:.9rem 0;color:var(--text3);font-size:.72rem;font-family:'Space Mono',monospace;}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border2);}
+.user-info-box{display:flex;align-items:center;gap:10px;padding:.8rem;background:var(--panel2);border-radius:12px;margin-bottom:.8rem;border:1px solid var(--border);}
+.user-info-box img{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);}
+.u-name{font-weight:600;font-size:.88rem;}
+.u-email{font-size:.72rem;color:var(--text2);}
+
+/* FAB */
+.edit-fab{position:fixed;bottom:84px;right:16px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#051200;border:none;font-size:1.1rem;box-shadow:0 6px 20px rgba(127,255,110,.35);z-index:150;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.edit-fab.show{display:flex;}
+
+/* MISC */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--accent);border-radius:100px;padding:10px 22px;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--text);box-shadow:0 8px 24px var(--shadow);z-index:1100;opacity:0;transition:all .3s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ── LOADING ── */
 .loader{display:flex;align-items:center;justify-content:center;gap:8px;padding:2rem;color:var(--text3);font-family:'Space Mono',monospace;font-size:.7rem;}
 .spin{animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* ── EMPTY STATE ── */
-.empty-state{text-align:center;padding:1.5rem;color:var(--text3);font-family:'Space Mono',monospace;font-size:.7rem;border:1px dashed var(--border2);border-radius:14px;}
-
-/* fade in animation */
+.empty-state{text-align:center;padding:1.5rem;color:var(--text3);font-family:'Space Mono',monospace;font-size:.7rem;border:1px dashed var(--border2);border-radius:12px;}
 .fade-in{animation:fadeIn .5s ease both;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
 ::-webkit-scrollbar{width:6px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
 </style>
@@ -169,42 +202,92 @@ section{margin-bottom:1.5rem;}
 <body>
 <div class="bg-grid"></div>
 <div class="bg-glow"></div>
-
 <div class="container">
 
   <!-- HEADER -->
   <header>
     <div class="logo">Dev<span>Card</span></div>
     <div class="header-right">
-      <button class="icon-btn" onclick="toggleTheme()" title="Theme">
-        <i class="fa-solid fa-circle-half-stroke"></i>
-      </button>
-      <button class="icon-btn" id="admin-login-btn" onclick="openAdminModal()" title="Admin">
-        <i class="fa-solid fa-user-shield"></i>
+      <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+      <button class="icon-btn" id="login-btn" onclick="openLoginModal()">
+        <i class="fa-solid fa-user"></i>
       </button>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="hero fade-in" id="hero-section">
-    <div class="avatar-wrap" id="avatar-wrap"><i class="fa-solid fa-user"></i></div>
-    <div class="hero-name" id="hero-name">লোড হচ্ছে...</div>
-    <div class="hero-role" id="hero-role">—</div>
-    <div class="hero-bio" id="hero-bio">—</div>
-    <div class="hero-socials" id="hero-socials"></div>
-    <div class="item-actions" style="max-width:240px;margin:.8rem auto 0;">
-      <button onclick="openProfileEditModal()"><i class="fa-solid fa-pen"></i> এডিট প্রোফাইল</button>
-    </div>
-  </section>
+  <!-- FACEBOOK-STYLE PROFILE -->
+  <div class="fb-profile-card fade-in" id="hero-section">
 
-  <!-- STATS -->
-  <section class="fade-in">
-    <div class="stats-row" id="stats-row">
-      <div class="stat-card"><div class="stat-value" id="stat-projects">0</div><div class="stat-label">Projects</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-skills">0</div><div class="stat-label">Skills</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-exp">0</div><div class="stat-label">Experience</div></div>
+    <!-- Cover Photo -->
+    <div class="cover-photo-wrap" id="cover-wrap">
+      <div class="cover-overlay"></div>
+      <div class="cover-name-badge">
+        <h2 id="cover-name">Ibrahim Khalil</h2>
+        <p id="cover-role">Digital Creator</p>
+      </div>
+      <button class="cover-edit-btn" onclick="openProfileEditModal()">
+        <i class="fa-solid fa-camera"></i> কভার এডিট
+      </button>
     </div>
-  </section>
+
+    <!-- Avatar + Action Buttons -->
+    <div class="fb-avatar-row">
+      <div class="fb-avatar-wrap">
+        <div id="avatar-display"><div class="av-icon"><i class="fa-solid fa-user"></i></div></div>
+        <div class="online-dot"></div>
+        <div class="av-cam" onclick="openProfileEditModal()"><i class="fa-solid fa-camera"></i></div>
+      </div>
+      <div class="fb-action-btns">
+        <button class="fb-btn primary" id="edit-profile-btn" onclick="openProfileEditModal()" style="display:none;">
+          <i class="fa-solid fa-pen"></i> এডিট প্রোফাইল
+        </button>
+        <button class="fb-btn secondary" id="login-action-btn" onclick="openLoginModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" style="flex-shrink:0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66 2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Gmail Login
+        </button>
+      </div>
+    </div>
+
+    <!-- Profile Info -->
+    <div class="fb-profile-info">
+      <div class="fb-name" id="hero-name">
+        Ibrahim Khalil <span class="verified"><i class="fa-solid fa-circle-check"></i></span>
+      </div>
+      <div class="fb-role" id="hero-role">Digital Creator</div>
+
+      <!-- Vibe bubble -->
+      <div class="vibe-bubble">
+        <div class="vibe-dot"></div>
+        <span id="vibe-text">Current vibe...</span>
+      </div>
+      <!-- Vibe edit (admin only) -->
+      <div class="vibe-edit-area">
+        <input type="text" id="vibe-input" placeholder="Current vibe লিখুন...">
+        <button class="vibe-save-btn" onclick="saveVibe()">সেভ</button>
+      </div>
+
+      <div class="fb-bio" id="hero-bio">Time is relative, but one-way.</div>
+
+      <!-- Meta -->
+      <div class="fb-meta" id="fb-meta-row">
+        <span class="fb-meta-item"><i class="fa-solid fa-clapperboard"></i> Digital creator</span>
+        <span class="fb-meta-item"><i class="fa-solid fa-location-dot"></i> Dhaka</span>
+        <span class="fb-meta-item"><i class="fa-solid fa-school"></i> Baraikhali high school</span>
+        <span class="fb-meta-item"><i class="fa-solid fa-graduation-cap"></i> Adarsha Degree College</span>
+        <span class="fb-meta-item"><i class="fa-brands fa-instagram"></i> <a href="https://instagram.com/ibrahim094is" target="_blank">ibrahim094is</a></span>
+      </div>
+
+      <!-- Stats (followers etc) -->
+      <div class="fb-stats">
+        <div class="fb-stat"><div class="fb-stat-num" id="stat-followers">951</div><div class="fb-stat-lbl">Followers</div></div>
+        <div class="fb-stat"><div class="fb-stat-num" id="stat-following">6</div><div class="fb-stat-lbl">Following</div></div>
+        <div class="fb-stat"><div class="fb-stat-num" id="stat-posts">107</div><div class="fb-stat-lbl">Posts</div></div>
+      </div>
+
+      <!-- Social links -->
+      <div class="fb-socials" id="hero-socials"></div>
+    </div>
+  </div>
 
   <!-- SKILLS -->
   <section class="fade-in">
@@ -234,22 +317,12 @@ section{margin-bottom:1.5rem;}
   <section class="fade-in" id="contact-section">
     <div class="section-title"><i class="fa-solid fa-envelope"></i> যোগাযোগ করুন</div>
     <div class="contact-form">
-      <div class="form-group">
-        <label>আপনার নাম</label>
-        <input type="text" id="msg-name" placeholder="নাম লিখুন">
-      </div>
-      <div class="form-group">
-        <label>ইমেইল</label>
-        <input type="email" id="msg-email" placeholder="email@example.com">
-      </div>
-      <div class="form-group">
-        <label>মেসেজ</label>
-        <textarea id="msg-text" rows="3" placeholder="আপনার মেসেজ লিখুন..."></textarea>
-      </div>
+      <div class="form-group"><label>আপনার নাম</label><input type="text" id="msg-name" placeholder="নাম লিখুন"></div>
+      <div class="form-group"><label>ইমেইল</label><input type="email" id="msg-email" placeholder="email@example.com"></div>
+      <div class="form-group"><label>মেসেজ</label><textarea id="msg-text" rows="3" placeholder="আপনার মেসেজ লিখুন..."></textarea></div>
       <button class="btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i> পাঠান</button>
     </div>
   </section>
-
 </div>
 
 <!-- BOTTOM NAV -->
@@ -262,471 +335,299 @@ section{margin-bottom:1.5rem;}
 </div>
 
 <div class="toast" id="toast"></div>
+<button class="edit-fab" id="logout-fab" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
 
-<!-- ══ ADMIN LOGIN MODAL ══ -->
-<div class="modal-overlay" id="admin-modal">
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="login-modal">
   <div class="modal">
-    <div class="modal-title">অ্যাডমিন লগইন <button class="modal-close" onclick="closeModal('admin-modal')"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="admin-email" placeholder="admin@example.com">
+    <div class="modal-title">
+      লগইন
+      <button class="modal-close" onclick="closeModal('login-modal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="admin-pass" placeholder="••••••••">
+    <div class="login-center">
+      <div class="login-logo">Dev<span>Card</span></div>
+      <div class="login-sub">Gmail দিয়ে লগইন করুন এবং প্রোফাইল এডিট করুন</div>
+
+      <!-- Logged-in state -->
+      <div id="logged-in-view" style="display:none;">
+        <div class="user-info-box">
+          <img id="u-photo" src="" alt="user">
+          <div>
+            <div class="u-name" id="u-name"></div>
+            <div class="u-email" id="u-email"></div>
+          </div>
+        </div>
+        <button class="btn danger" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</button>
+      </div>
+
+      <!-- Login state -->
+      <div id="login-view">
+        <button class="btn google-btn" onclick="googleLogin()">
+          <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66 2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google / Gmail দিয়ে লগইন
+        </button>
+        <div class="or-div">অথবা Email দিয়ে</div>
+        <div class="form-group"><label>Email</label><input type="email" id="admin-email" placeholder="admin@example.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="admin-pass" placeholder="••••••••"></div>
+        <button class="btn" onclick="emailLogin()"><i class="fa-solid fa-key"></i> লগইন করুন</button>
+      </div>
     </div>
-    <button class="btn" onclick="adminLogin()"><i class="fa-solid fa-key"></i> লগইন</button>
   </div>
 </div>
 
-<!-- ══ PROFILE EDIT MODAL ══ -->
+<!-- PROFILE EDIT MODAL -->
 <div class="modal-overlay" id="profile-modal">
   <div class="modal">
     <div class="modal-title">প্রোফাইল এডিট <button class="modal-close" onclick="closeModal('profile-modal')"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="form-group"><label>নাম</label><input type="text" id="pf-name"></div>
-    <div class="form-group"><label>পদবি / Role</label><input type="text" id="pf-role" placeholder="e.g. Full Stack Developer"></div>
+    <div class="form-group"><label>পদবি / Role</label><input type="text" id="pf-role" placeholder="Digital Creator"></div>
     <div class="form-group"><label>বায়ো</label><textarea id="pf-bio" rows="3"></textarea></div>
     <div class="form-group"><label>প্রোফাইল ছবি URL</label><input type="text" id="pf-avatar" placeholder="https://..."></div>
+    <div class="form-group"><label>কভার ফটো URL</label><input type="text" id="pf-cover" placeholder="https://..."></div>
+    <div class="form-group"><label>লোকেশন</label><input type="text" id="pf-location" placeholder="Dhaka"></div>
+    <div class="form-group"><label>স্কুল</label><input type="text" id="pf-school"></div>
+    <div class="form-group"><label>কলেজ</label><input type="text" id="pf-college"></div>
+    <div class="form-group"><label>Instagram Username</label><input type="text" id="pf-instagram" placeholder="ibrahim094is"></div>
+    <div class="form-group"><label>Followers সংখ্যা</label><input type="number" id="pf-followers"></div>
+    <div class="form-group"><label>Following সংখ্যা</label><input type="number" id="pf-following"></div>
+    <div class="form-group"><label>Posts সংখ্যা</label><input type="number" id="pf-posts"></div>
     <div class="form-group"><label>GitHub URL</label><input type="text" id="pf-github" placeholder="https://github.com/..."></div>
-    <div class="form-group"><label>LinkedIn URL</label><input type="text" id="pf-linkedin" placeholder="https://linkedin.com/in/..."></div>
     <div class="form-group"><label>Facebook URL</label><input type="text" id="pf-facebook" placeholder="https://facebook.com/..."></div>
-    <div class="form-group"><label>Twitter / X URL</label><input type="text" id="pf-twitter" placeholder="https://x.com/..."></div>
-    <div class="form-group"><label>Email</label><input type="text" id="pf-email" placeholder="you@example.com"></div>
-    <div class="form-group"><label>অভিজ্ঞতা (বছর)</label><input type="number" id="pf-exp" placeholder="e.g. 3"></div>
+    <div class="form-group"><label>Email (যোগাযোগ)</label><input type="text" id="pf-email"></div>
     <button class="btn" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> সেভ করুন</button>
   </div>
 </div>
 
-<!-- ══ SKILL MODAL ══ -->
+<!-- SKILL MODAL -->
 <div class="modal-overlay" id="skill-modal">
   <div class="modal">
-    <div class="modal-title">নতুন স্কিল যুক্ত করুন <button class="modal-close" onclick="closeModal('skill-modal')"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="form-group"><label>স্কিলের নাম</label><input type="text" id="sk-name" placeholder="e.g. JavaScript"></div>
-    <div class="form-group"><label>লেভেল (%) — ০ থেকে ১০০</label><input type="number" id="sk-level" min="0" max="100" placeholder="80"></div>
+    <div class="modal-title">নতুন স্কিল <button class="modal-close" onclick="closeModal('skill-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group"><label>স্কিলের নাম</label><input type="text" id="sk-name" placeholder="JavaScript"></div>
+    <div class="form-group"><label>লেভেল % (০–১০০)</label><input type="number" id="sk-level" min="0" max="100" placeholder="80"></div>
     <button class="btn" onclick="addSkill()"><i class="fa-solid fa-plus"></i> যুক্ত করুন</button>
   </div>
 </div>
 
-<!-- ══ PROJECT MODAL ══ -->
+<!-- PROJECT MODAL -->
 <div class="modal-overlay" id="project-modal">
   <div class="modal">
-    <div class="modal-title">নতুন প্রজেক্ট যুক্ত করুন <button class="modal-close" onclick="closeModal('project-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-title">প্রজেক্ট <button class="modal-close" onclick="closeModal('project-modal')"><i class="fa-solid fa-xmark"></i></button></div>
     <input type="hidden" id="pr-id">
-    <div class="form-group"><label>প্রজেক্ট টাইটেল</label><input type="text" id="pr-title" placeholder="e.g. E-commerce App"></div>
-    <div class="form-group"><label>বর্ণনা</label><textarea id="pr-desc" rows="3" placeholder="প্রজেক্ট সম্পর্কে লিখুন..."></textarea></div>
+    <div class="form-group"><label>টাইটেল</label><input type="text" id="pr-title"></div>
+    <div class="form-group"><label>বর্ণনা</label><textarea id="pr-desc" rows="3"></textarea></div>
     <div class="form-group"><label>ছবি URL</label><input type="text" id="pr-image" placeholder="https://..."></div>
-    <div class="form-group"><label>ট্যাগ (কমা দিয়ে আলাদা করুন)</label><input type="text" id="pr-tags" placeholder="React, Firebase, CSS"></div>
-    <div class="form-group"><label>লাইভ ডেমো URL</label><input type="text" id="pr-demo" placeholder="https://..."></div>
-    <div class="form-group"><label>সোর্স কোড URL (GitHub)</label><input type="text" id="pr-code" placeholder="https://github.com/..."></div>
+    <div class="form-group"><label>ট্যাগ (কমা দিয়ে)</label><input type="text" id="pr-tags" placeholder="React, Firebase"></div>
+    <div class="form-group"><label>Live Demo URL</label><input type="text" id="pr-demo" placeholder="https://..."></div>
+    <div class="form-group"><label>GitHub URL</label><input type="text" id="pr-code" placeholder="https://github.com/..."></div>
     <button class="btn" onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> সেভ করুন</button>
   </div>
 </div>
 
-<!-- ══ EXPERIENCE MODAL ══ -->
+<!-- EXPERIENCE MODAL -->
 <div class="modal-overlay" id="exp-modal">
   <div class="modal">
-    <div class="modal-title">অভিজ্ঞতা যুক্ত করুন <button class="modal-close" onclick="closeModal('exp-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-title">অভিজ্ঞতা <button class="modal-close" onclick="closeModal('exp-modal')"><i class="fa-solid fa-xmark"></i></button></div>
     <input type="hidden" id="ex-id">
-    <div class="form-group"><label>পদবি</label><input type="text" id="ex-role" placeholder="e.g. Frontend Developer"></div>
-    <div class="form-group"><label>কোম্পানি / প্রতিষ্ঠান</label><input type="text" id="ex-org" placeholder="e.g. ABC Tech Ltd."></div>
-    <div class="form-group"><label>সময়কাল</label><input type="text" id="ex-date" placeholder="e.g. Jan 2023 - বর্তমান"></div>
-    <div class="form-group"><label>বর্ণনা</label><textarea id="ex-desc" rows="3" placeholder="দায়িত্ব ও কাজ সম্পর্কে..."></textarea></div>
+    <div class="form-group"><label>পদবি</label><input type="text" id="ex-role" placeholder="Frontend Developer"></div>
+    <div class="form-group"><label>কোম্পানি</label><input type="text" id="ex-org"></div>
+    <div class="form-group"><label>সময়কাল</label><input type="text" id="ex-date" placeholder="Jan 2023 – বর্তমান"></div>
+    <div class="form-group"><label>বর্ণনা</label><textarea id="ex-desc" rows="3"></textarea></div>
     <button class="btn" onclick="saveExp()"><i class="fa-solid fa-floppy-disk"></i> সেভ করুন</button>
   </div>
 </div>
 
-<!-- Floating Logout (admin mode) -->
-<button class="edit-fab" id="logout-fab" onclick="adminLogout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
-
-<!-- Firebase SDKs -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <script>
-/* ══════════════════ FIREBASE CONFIG ══════════════════ */
-const firebaseConfig = {
-  apiKey: "AIzaSyA_vr4EXR57ap2CRxlS1JpK6wHqIwlU8Rc",
-  authDomain: "devcard-6b634.firebaseapp.com",
-  databaseURL: "https://devcard-6b634-default-rtdb.firebaseio.com",
-  projectId: "devcard-6b634",
-  storageBucket: "devcard-6b634.firebasestorage.app",
-  messagingSenderId: "754891867884",
-  appId: "1:754891867884:web:f6ff7e2f8d2fcf8ae147c9",
-  measurementId: "G-C3P4HVH0C0"
-};
+const firebaseConfig={apiKey:"AIzaSyA_vr4EXR57ap2CRxlS1JpK6wHqIwlU8Rc",authDomain:"devcard-6b634.firebaseapp.com",databaseURL:"https://devcard-6b634-default-rtdb.firebaseio.com",projectId:"devcard-6b634",storageBucket:"devcard-6b634.firebasestorage.app",messagingSenderId:"754891867884",appId:"1:754891867884:web:f6ff7e2f8d2fcf8ae147c9"};
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+const auth=firebase.auth();
+const db=firebase.database();
+let isAdmin=false;
 
-let isAdmin = false;
+/* THEME */
+function toggleTheme(){const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('devcard-theme',n);}
+(()=>{const s=localStorage.getItem('devcard-theme');if(s)document.documentElement.setAttribute('data-theme',s);})();
 
-/* ══════════════════ THEME ══════════════════ */
-function toggleTheme(){
-  const html = document.documentElement;
-  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  localStorage.setItem('devcard-theme', next);
-}
-(function(){
-  const saved = localStorage.getItem('devcard-theme');
-  if(saved) document.documentElement.setAttribute('data-theme', saved);
-})();
+/* TOAST */
+let _tt;
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2200);}
 
-/* ══════════════════ TOAST ══════════════════ */
-let toastTimer;
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
-}
+/* MODALS */
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function openModal(id){document.getElementById(id).classList.add('show');}
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');});});
 
-/* ══════════════════ MODALS ══════════════════ */
-function closeModal(id){ document.getElementById(id).classList.remove('show'); }
-function openModal(id){ document.getElementById(id).classList.add('show'); }
+/* NAV */
+function scrollToSection(id,btn){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));btn.classList.add('active');}
 
-document.querySelectorAll('.modal-overlay').forEach(ov=>{
-  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('show'); });
-});
-
-/* ══════════════════ NAV SCROLL ══════════════════ */
-function scrollToSection(id, btn){
-  document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  btn.classList.add('active');
+/* ═══ AUTH ═══ */
+function openLoginModal(){
+  const user=auth.currentUser;
+  if(user){
+    document.getElementById('logged-in-view').style.display='block';
+    document.getElementById('login-view').style.display='none';
+    document.getElementById('u-photo').src=user.photoURL||('https://ui-avatars.com/api/?name='+encodeURIComponent(user.displayName||'U')+'&background=7fff6e&color=051200');
+    document.getElementById('u-name').textContent=user.displayName||'User';
+    document.getElementById('u-email').textContent=user.email;
+  } else {
+    document.getElementById('logged-in-view').style.display='none';
+    document.getElementById('login-view').style.display='block';
+  }
+  openModal('login-modal');
 }
 
-/* ══════════════════ ADMIN AUTH ══════════════════ */
-const ADMIN_BTN = document.getElementById('admin-login-btn');
-
-function openAdminModal(){
-  if(isAdmin){ adminLogout(); return; }
-  openModal('admin-modal');
+function googleLogin(){
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .then(()=>{closeModal('login-modal');showToast('Google লগইন সফল ✅');})
+    .catch(e=>showToast('এরর: '+e.message));
 }
 
-function adminLogin(){
-  const email = document.getElementById('admin-email').value.trim();
-  const pass = document.getElementById('admin-pass').value;
-  if(!email || !pass){ showToast('ইমেইল ও পাসওয়ার্ড দিন'); return; }
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(()=>{
-      closeModal('admin-modal');
-      showToast('লগইন সফল ✅');
-    })
+function emailLogin(){
+  const e=document.getElementById('admin-email').value.trim();
+  const p=document.getElementById('admin-pass').value;
+  if(!e||!p){showToast('ইমেইল ও পাসওয়ার্ড দিন');return;}
+  auth.signInWithEmailAndPassword(e,p)
+    .then(()=>{closeModal('login-modal');showToast('লগইন সফল ✅');})
     .catch(err=>{
-      // If user doesn't exist yet, create it as first-time admin setup
-      if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential'){
-        auth.createUserWithEmailAndPassword(email, pass)
-          .then(()=>{ closeModal('admin-modal'); showToast('অ্যাডমিন একাউন্ট তৈরি হয়েছে ✅'); })
-          .catch(e2=>showToast('এরর: '+e2.message));
-      } else {
-        showToast('এরর: '+err.message);
-      }
+      if(err.code==='auth/user-not-found'||err.code==='auth/invalid-credential'){
+        auth.createUserWithEmailAndPassword(e,p).then(()=>{closeModal('login-modal');showToast('একাউন্ট তৈরি ও লগইন ✅');}).catch(e2=>showToast('এরর: '+e2.message));
+      } else showToast('এরর: '+err.message);
     });
 }
 
-function adminLogout(){
-  auth.signOut().then(()=>showToast('লগআউট হয়েছে'));
-}
+function doLogout(){auth.signOut().then(()=>{showToast('লগআউট হয়েছে');closeModal('login-modal');});}
 
 auth.onAuthStateChanged(user=>{
-  isAdmin = !!user;
-  document.body.classList.toggle('admin-mode', isAdmin);
-  document.getElementById('logout-fab').classList.toggle('show', isAdmin);
-  ADMIN_BTN.innerHTML = isAdmin ? '<i class="fa-solid fa-lock-open"></i>' : '<i class="fa-solid fa-user-shield"></i>';
-  ADMIN_BTN.title = isAdmin ? 'Admin mode (click to logout)' : 'Admin login';
+  isAdmin=!!user;
+  document.body.classList.toggle('admin-mode',isAdmin);
+  document.getElementById('logout-fab').classList.toggle('show',isAdmin);
+  const lb=document.getElementById('login-btn');
+  lb.innerHTML=isAdmin?`<img src="${user.photoURL||'https://ui-avatars.com/api/?name=U&background=7fff6e&color=051200'}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" alt="u">`:'<i class="fa-solid fa-user"></i>';
+  document.getElementById('edit-profile-btn').style.display=isAdmin?'flex':'none';
+  document.getElementById('login-action-btn').style.display=isAdmin?'none':'flex';
 });
 
-/* ══════════════════ PROFILE ══════════════════ */
-const profileRef = db.ref('profile');
+/* ═══ PROFILE ═══ */
+const profileRef=db.ref('profile');
+profileRef.on('value',snap=>{
+  const d=snap.val()||{};
+  const name=d.name||'Ibrahim Khalil';
+  document.getElementById('hero-name').innerHTML=escH(name)+' <span class="verified"><i class="fa-solid fa-circle-check"></i></span>';
+  document.getElementById('cover-name').textContent=name;
+  document.getElementById('hero-role').textContent=d.role||'Digital Creator';
+  document.getElementById('cover-role').textContent=d.role||'Digital Creator';
+  document.getElementById('hero-bio').textContent=d.bio||'Time is relative, but one-way.';
+  document.getElementById('vibe-text').textContent=d.vibe||'Current vibe...';
+  document.getElementById('vibe-input').value=d.vibe||'';
+  document.getElementById('stat-followers').textContent=d.followers||'951';
+  document.getElementById('stat-following').textContent=d.following||'6';
+  document.getElementById('stat-posts').textContent=d.posts||'107';
 
-profileRef.on('value', snap=>{
-  const d = snap.val() || {};
-  document.getElementById('hero-name').textContent = d.name || 'আপনার নাম';
-  document.getElementById('hero-role').textContent = d.role || 'Your Role / Title';
-  document.getElementById('hero-bio').textContent = d.bio || 'এডিট করে আপনার পরিচিতি লিখুন।';
-  document.getElementById('stat-exp').textContent = (d.experience || 0) + '+';
+  // Avatar
+  const ad=document.getElementById('avatar-display');
+  ad.innerHTML=d.avatar?`<img class="av-img" src="${escH(d.avatar)}" alt="avatar">`:`<div class="av-icon"><i class="fa-solid fa-user"></i></div>`;
 
-  const avatarWrap = document.getElementById('avatar-wrap');
-  avatarWrap.innerHTML = d.avatar
-    ? `<img src="${escapeHtml(d.avatar)}" alt="avatar">`
-    : `<i class="fa-solid fa-user"></i>`;
+  // Cover
+  const cw=document.getElementById('cover-wrap');
+  const ci=cw.querySelector('.cover-bg-img');
+  if(ci)ci.remove();
+  if(d.cover){const img=document.createElement('img');img.className='cover-bg-img';img.src=d.cover;img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;';cw.prepend(img);}
 
-  const socials = [];
-  if(d.github) socials.push({icon:'fa-brands fa-github', url:d.github});
-  if(d.linkedin) socials.push({icon:'fa-brands fa-linkedin-in', url:d.linkedin});
-  if(d.facebook) socials.push({icon:'fa-brands fa-facebook-f', url:d.facebook});
-  if(d.twitter) socials.push({icon:'fa-brands fa-x-twitter', url:d.twitter});
-  if(d.email) socials.push({icon:'fa-solid fa-envelope', url:'mailto:'+d.email});
+  // Meta
+  let m='';
+  m+=`<span class="fb-meta-item"><i class="fa-solid fa-clapperboard"></i> ${escH(d.role||'Digital creator')}</span>`;
+  if(d.location)m+=`<span class="fb-meta-item"><i class="fa-solid fa-location-dot"></i> ${escH(d.location)}</span>`;
+  if(d.school)m+=`<span class="fb-meta-item"><i class="fa-solid fa-school"></i> ${escH(d.school)}</span>`;
+  if(d.college)m+=`<span class="fb-meta-item"><i class="fa-solid fa-graduation-cap"></i> ${escH(d.college)}</span>`;
+  if(d.instagram)m+=`<span class="fb-meta-item"><i class="fa-brands fa-instagram"></i> <a href="https://instagram.com/${escH(d.instagram)}" target="_blank">${escH(d.instagram)}</a></span>`;
+  if(d.email)m+=`<span class="fb-meta-item"><i class="fa-solid fa-envelope"></i> ${escH(d.email)}</span>`;
+  document.getElementById('fb-meta-row').innerHTML=m;
 
-  document.getElementById('hero-socials').innerHTML = socials.map(s=>
-    `<a class="social-btn" href="${escapeAttr(s.url)}" target="_blank" rel="noopener"><i class="${s.icon}"></i></a>`
-  ).join('') || '<span style="font-family:\'Space Mono\',monospace;font-size:.6rem;color:var(--text3);">সোশ্যাল লিংক যুক্ত করুন</span>';
+  // Socials
+  const s=[];
+  if(d.github)s.push({i:'fa-brands fa-github',u:d.github,l:'GitHub'});
+  if(d.facebook)s.push({i:'fa-brands fa-facebook-f',u:d.facebook,l:'Facebook'});
+  if(d.instagram)s.push({i:'fa-brands fa-instagram',u:'https://instagram.com/'+d.instagram,l:'Instagram'});
+  if(d.email)s.push({i:'fa-solid fa-envelope',u:'mailto:'+d.email,l:'Email'});
+  document.getElementById('hero-socials').innerHTML=s.map(x=>`<a class="fb-social-link" href="${escH(x.u)}" target="_blank"><i class="${x.i}"></i> ${x.l}</a>`).join('');
 
-  // store for edit modal
-  window._profileData = d;
+  window._pd=d;
 });
 
 function openProfileEditModal(){
-  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
-  const d = window._profileData || {};
-  document.getElementById('pf-name').value = d.name || '';
-  document.getElementById('pf-role').value = d.role || '';
-  document.getElementById('pf-bio').value = d.bio || '';
-  document.getElementById('pf-avatar').value = d.avatar || '';
-  document.getElementById('pf-github').value = d.github || '';
-  document.getElementById('pf-linkedin').value = d.linkedin || '';
-  document.getElementById('pf-facebook').value = d.facebook || '';
-  document.getElementById('pf-twitter').value = d.twitter || '';
-  document.getElementById('pf-email').value = d.email || '';
-  document.getElementById('pf-exp').value = d.experience || '';
+  if(!isAdmin){showToast('প্রথমে Gmail দিয়ে লগইন করুন');openLoginModal();return;}
+  const d=window._pd||{};
+  ['name','role','bio','avatar','cover','location','school','college','instagram','followers','following','posts','github','facebook','email'].forEach(k=>{
+    const el=document.getElementById('pf-'+k);
+    if(el)el.value=d[k]||'';
+  });
   openModal('profile-modal');
 }
 
 function saveProfile(){
-  const data = {
-    name: document.getElementById('pf-name').value.trim(),
-    role: document.getElementById('pf-role').value.trim(),
-    bio: document.getElementById('pf-bio').value.trim(),
-    avatar: document.getElementById('pf-avatar').value.trim(),
-    github: document.getElementById('pf-github').value.trim(),
-    linkedin: document.getElementById('pf-linkedin').value.trim(),
-    facebook: document.getElementById('pf-facebook').value.trim(),
-    twitter: document.getElementById('pf-twitter').value.trim(),
-    email: document.getElementById('pf-email').value.trim(),
-    experience: parseInt(document.getElementById('pf-exp').value) || 0
-  };
-  profileRef.set(data)
-    .then(()=>{ closeModal('profile-modal'); showToast('প্রোফাইল সেভ হয়েছে ✅'); })
-    .catch(e=>showToast('এরর: '+e.message));
+  const fields=['name','role','bio','avatar','cover','location','school','college','instagram','github','facebook','email'];
+  const numFields=['followers','following','posts'];
+  const data={};
+  fields.forEach(k=>{data[k]=document.getElementById('pf-'+k).value.trim();});
+  numFields.forEach(k=>{data[k]=parseInt(document.getElementById('pf-'+k).value)||0;});
+  if(window._pd&&window._pd.vibe)data.vibe=window._pd.vibe;
+  profileRef.set(data).then(()=>{closeModal('profile-modal');showToast('প্রোফাইল সেভ হয়েছে ✅');}).catch(e=>showToast('এরর: '+e.message));
 }
 
-/* ══════════════════ SKILLS ══════════════════ */
-const skillsRef = db.ref('skills');
+function saveVibe(){
+  if(!isAdmin)return;
+  const v=document.getElementById('vibe-input').value.trim();
+  if(!v){showToast('Vibe লিখুন');return;}
+  profileRef.update({vibe:v}).then(()=>showToast('Vibe সেভ হয়েছে ✅'));
+}
 
-skillsRef.on('value', snap=>{
-  const wrap = document.getElementById('skills-wrap');
-  const items = snap.val();
-  if(!items){
-    wrap.innerHTML = `<div class="empty-state">কোনো স্কিল যুক্ত করা হয়নি</div>`;
-    document.getElementById('stat-skills').textContent = '0';
-    return;
-  }
-  const keys = Object.keys(items);
-  document.getElementById('stat-skills').textContent = keys.length;
-  wrap.innerHTML = keys.map(k=>{
-    const s = items[k];
-    return `<div class="skill-chip">
-      <span>${escapeHtml(s.name)}</span>
-      <div class="lvl-bar"><div class="lvl-fill" style="width:${s.level||50}%"></div></div>
-      <span style="color:var(--text3);font-size:.6rem;">${s.level||50}%</span>
-      ${isAdmin ? `<button onclick="deleteSkill('${k}')" style="background:none;border:none;color:var(--text3);cursor:pointer;margin-left:4px;"><i class="fa-solid fa-xmark"></i></button>` : ''}
-    </div>`;
-  }).join('');
+/* ═══ SKILLS ═══ */
+const skillsRef=db.ref('skills');
+skillsRef.on('value',snap=>{
+  const w=document.getElementById('skills-wrap'),items=snap.val();
+  if(!items){w.innerHTML='<div class="empty-state">কোনো স্কিল যুক্ত করা হয়নি</div>';return;}
+  w.innerHTML=Object.keys(items).map(k=>{const s=items[k];return`<div class="skill-chip"><span>${escH(s.name)}</span><div class="lvl-bar"><div class="lvl-fill" style="width:${s.level||50}%"></div></div><span style="color:var(--text3);font-size:.6rem;">${s.level||50}%</span>${isAdmin?`<button onclick="deleteSkill('${k}')" style="background:none;border:none;color:var(--text3);cursor:pointer;margin-left:3px;font-size:.8rem;"><i class="fa-solid fa-xmark"></i></button>`:''}</div>`;}).join('');
 });
+function openSkillModal(){if(!isAdmin){showToast('প্রথমে লগইন করুন');return;}document.getElementById('sk-name').value='';document.getElementById('sk-level').value='';openModal('skill-modal');}
+function addSkill(){const n=document.getElementById('sk-name').value.trim(),l=Math.max(0,Math.min(100,parseInt(document.getElementById('sk-level').value)||50));if(!n){showToast('স্কিলের নাম দিন');return;}skillsRef.push({name:n,level:l}).then(()=>{closeModal('skill-modal');showToast('স্কিল যুক্ত হয়েছে ✅');}).catch(e=>showToast('এরর: '+e.message));}
+function deleteSkill(k){if(!confirm('ডিলিট করবেন?'))return;skillsRef.child(k).remove().then(()=>showToast('ডিলিট হয়েছে'));}
 
-function openSkillModal(){
-  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
-  document.getElementById('sk-name').value = '';
-  document.getElementById('sk-level').value = '';
-  openModal('skill-modal');
-}
-
-function addSkill(){
-  const name = document.getElementById('sk-name').value.trim();
-  const level = Math.max(0, Math.min(100, parseInt(document.getElementById('sk-level').value) || 50));
-  if(!name){ showToast('স্কিলের নাম দিন'); return; }
-  skillsRef.push({name, level})
-    .then(()=>{ closeModal('skill-modal'); showToast('স্কিল যুক্ত হয়েছে ✅'); })
-    .catch(e=>showToast('এরর: '+e.message));
-}
-
-function deleteSkill(key){
-  if(!confirm('এই স্কিল ডিলিট করবেন?')) return;
-  skillsRef.child(key).remove().then(()=>showToast('ডিলিট হয়েছে'));
-}
-
-/* ══════════════════ PROJECTS ══════════════════ */
-const projectsRef = db.ref('projects');
-
-projectsRef.on('value', snap=>{
-  const wrap = document.getElementById('projects-wrap');
-  const items = snap.val();
-  if(!items){
-    wrap.innerHTML = `<div class="empty-state">কোনো প্রজেক্ট যুক্ত করা হয়নি</div>`;
-    document.getElementById('stat-projects').textContent = '0';
-    return;
-  }
-  const keys = Object.keys(items);
-  document.getElementById('stat-projects').textContent = keys.length;
-  wrap.innerHTML = keys.map(k=>{
-    const p = items[k];
-    const tags = (p.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
-    return `<div class="project-card fade-in">
-      ${p.image ? `<img class="project-img" src="${escapeHtml(p.image)}" alt="${escapeAttr(p.title)}">` : `<div class="project-img-placeholder"><i class="fa-solid fa-image"></i></div>`}
-      <div class="project-body">
-        <div class="project-title">${escapeHtml(p.title)}</div>
-        <div class="project-desc">${escapeHtml(p.desc||'')}</div>
-        ${tags.length ? `<div class="project-tags">${tags.map(t=>`<span class="project-tag">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
-        <div class="project-links">
-          ${p.demo ? `<a class="proj-link primary" href="${escapeAttr(p.demo)}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo</a>` : ''}
-          ${p.code ? `<a class="proj-link" href="${escapeAttr(p.code)}" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> Code</a>` : ''}
-        </div>
-        <div class="item-actions">
-          <button onclick="editProject('${k}')"><i class="fa-solid fa-pen"></i> এডিট</button>
-          <button class="del" onclick="deleteProject('${k}')"><i class="fa-solid fa-trash"></i> ডিলিট</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+/* ═══ PROJECTS ═══ */
+const projectsRef=db.ref('projects');
+let _pc={};
+projectsRef.on('value',snap=>{
+  _pc=snap.val()||{};
+  const w=document.getElementById('projects-wrap'),items=snap.val();
+  if(!items){w.innerHTML='<div class="empty-state">কোনো প্রজেক্ট যুক্ত করা হয়নি</div>';return;}
+  w.innerHTML=Object.keys(items).map(k=>{const p=items[k],tags=(p.tags||'').split(',').map(t=>t.trim()).filter(Boolean);return`<div class="project-card fade-in">${p.image?`<img class="project-img" src="${escH(p.image)}" alt="${escH(p.title)}">`:'<div class="project-img-placeholder"><i class="fa-solid fa-image"></i></div>'}<div class="project-body"><div class="project-title">${escH(p.title)}</div><div class="project-desc">${escH(p.desc||'')}</div>${tags.length?`<div class="project-tags">${tags.map(t=>`<span class="project-tag">${escH(t)}</span>`).join('')}</div>`:''}<div class="project-links">${p.demo?`<a class="proj-link primary" href="${escH(p.demo)}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Live</a>`:''} ${p.code?`<a class="proj-link" href="${escH(p.code)}" target="_blank"><i class="fa-brands fa-github"></i> Code</a>`:''}</div><div class="item-actions"><button onclick="editProject('${k}')"><i class="fa-solid fa-pen"></i> এডিট</button><button class="del" onclick="deleteProject('${k}')"><i class="fa-solid fa-trash"></i> ডিলিট</button></div></div></div>`;}).join('');
 });
+function openProjectModal(){if(!isAdmin){showToast('প্রথমে লগইন করুন');return;}['pr-id','pr-title','pr-desc','pr-image','pr-tags','pr-demo','pr-code'].forEach(id=>document.getElementById(id).value='');openModal('project-modal');}
+function editProject(k){if(!isAdmin)return;const p=_pc[k];if(!p)return;document.getElementById('pr-id').value=k;document.getElementById('pr-title').value=p.title||'';document.getElementById('pr-desc').value=p.desc||'';document.getElementById('pr-image').value=p.image||'';document.getElementById('pr-tags').value=p.tags||'';document.getElementById('pr-demo').value=p.demo||'';document.getElementById('pr-code').value=p.code||'';openModal('project-modal');}
+function saveProject(){const id=document.getElementById('pr-id').value,data={title:document.getElementById('pr-title').value.trim(),desc:document.getElementById('pr-desc').value.trim(),image:document.getElementById('pr-image').value.trim(),tags:document.getElementById('pr-tags').value.trim(),demo:document.getElementById('pr-demo').value.trim(),code:document.getElementById('pr-code').value.trim()};if(!data.title){showToast('টাইটেল দিন');return;}const ref=id?projectsRef.child(id):projectsRef.push();ref.set(data).then(()=>{closeModal('project-modal');showToast('সেভ হয়েছে ✅');}).catch(e=>showToast('এরর: '+e.message));}
+function deleteProject(k){if(!confirm('ডিলিট করবেন?'))return;projectsRef.child(k).remove().then(()=>showToast('ডিলিট হয়েছে'));}
 
-let _projectsCache = {};
-projectsRef.on('value', snap=>{ _projectsCache = snap.val() || {}; });
-
-function openProjectModal(){
-  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
-  document.getElementById('pr-id').value = '';
-  document.getElementById('pr-title').value = '';
-  document.getElementById('pr-desc').value = '';
-  document.getElementById('pr-image').value = '';
-  document.getElementById('pr-tags').value = '';
-  document.getElementById('pr-demo').value = '';
-  document.getElementById('pr-code').value = '';
-  openModal('project-modal');
-}
-
-function editProject(key){
-  if(!isAdmin) return;
-  const p = _projectsCache[key];
-  if(!p) return;
-  document.getElementById('pr-id').value = key;
-  document.getElementById('pr-title').value = p.title || '';
-  document.getElementById('pr-desc').value = p.desc || '';
-  document.getElementById('pr-image').value = p.image || '';
-  document.getElementById('pr-tags').value = p.tags || '';
-  document.getElementById('pr-demo').value = p.demo || '';
-  document.getElementById('pr-code').value = p.code || '';
-  openModal('project-modal');
-}
-
-function saveProject(){
-  const id = document.getElementById('pr-id').value;
-  const data = {
-    title: document.getElementById('pr-title').value.trim(),
-    desc: document.getElementById('pr-desc').value.trim(),
-    image: document.getElementById('pr-image').value.trim(),
-    tags: document.getElementById('pr-tags').value.trim(),
-    demo: document.getElementById('pr-demo').value.trim(),
-    code: document.getElementById('pr-code').value.trim()
-  };
-  if(!data.title){ showToast('প্রজেক্ট টাইটেল দিন'); return; }
-  const ref = id ? projectsRef.child(id) : projectsRef.push();
-  ref.set(data)
-    .then(()=>{ closeModal('project-modal'); showToast('প্রজেক্ট সেভ হয়েছে ✅'); })
-    .catch(e=>showToast('এরর: '+e.message));
-}
-
-function deleteProject(key){
-  if(!confirm('এই প্রজেক্ট ডিলিট করবেন?')) return;
-  projectsRef.child(key).remove().then(()=>showToast('ডিলিট হয়েছে'));
-}
-
-/* ══════════════════ EXPERIENCE ══════════════════ */
-const expRef = db.ref('experience');
-let _expCache = {};
-
-expRef.on('value', snap=>{
-  const wrap = document.getElementById('exp-wrap');
-  const items = snap.val();
-  _expCache = items || {};
-  if(!items){
-    wrap.innerHTML = `<div class="empty-state">কোনো অভিজ্ঞতা যুক্ত করা হয়নি</div>`;
-    return;
-  }
-  // sort by order added (keys), most recent first if there's a date field — just reverse insertion order
-  const keys = Object.keys(items).reverse();
-  wrap.innerHTML = keys.map(k=>{
-    const e = items[k];
-    return `<div class="tl-item fade-in">
-      <div class="tl-role">${escapeHtml(e.role)}</div>
-      <div class="tl-org">${escapeHtml(e.org||'')}</div>
-      <div class="tl-date">${escapeHtml(e.date||'')}</div>
-      <div class="tl-desc">${escapeHtml(e.desc||'')}</div>
-      <div class="item-actions">
-        <button onclick="editExp('${k}')"><i class="fa-solid fa-pen"></i> এডিট</button>
-        <button class="del" onclick="deleteExp('${k}')"><i class="fa-solid fa-trash"></i> ডিলিট</button>
-      </div>
-    </div>`;
-  }).join('');
+/* ═══ EXPERIENCE ═══ */
+const expRef=db.ref('experience');
+let _ec={};
+expRef.on('value',snap=>{
+  _ec=snap.val()||{};
+  const w=document.getElementById('exp-wrap'),items=snap.val();
+  if(!items){w.innerHTML='<div class="empty-state">কোনো অভিজ্ঞতা যুক্ত করা হয়নি</div>';return;}
+  w.innerHTML=Object.keys(items).reverse().map(k=>{const e=items[k];return`<div class="tl-item fade-in"><div class="tl-role">${escH(e.role)}</div><div class="tl-org">${escH(e.org||'')}</div><div class="tl-date">${escH(e.date||'')}</div><div class="tl-desc">${escH(e.desc||'')}</div><div class="item-actions"><button onclick="editExp('${k}')"><i class="fa-solid fa-pen"></i> এডিট</button><button class="del" onclick="deleteExp('${k}')"><i class="fa-solid fa-trash"></i> ডিলিট</button></div></div>`;}).join('');
 });
+function openExpModal(){if(!isAdmin){showToast('প্রথমে লগইন করুন');return;}['ex-id','ex-role','ex-org','ex-date','ex-desc'].forEach(id=>document.getElementById(id).value='');openModal('exp-modal');}
+function editExp(k){if(!isAdmin)return;const e=_ec[k];if(!e)return;document.getElementById('ex-id').value=k;document.getElementById('ex-role').value=e.role||'';document.getElementById('ex-org').value=e.org||'';document.getElementById('ex-date').value=e.date||'';document.getElementById('ex-desc').value=e.desc||'';openModal('exp-modal');}
+function saveExp(){const id=document.getElementById('ex-id').value,data={role:document.getElementById('ex-role').value.trim(),org:document.getElementById('ex-org').value.trim(),date:document.getElementById('ex-date').value.trim(),desc:document.getElementById('ex-desc').value.trim()};if(!data.role){showToast('পদবি দিন');return;}const ref=id?expRef.child(id):expRef.push();ref.set(data).then(()=>{closeModal('exp-modal');showToast('সেভ হয়েছে ✅');}).catch(e=>showToast('এরর: '+e.message));}
+function deleteExp(k){if(!confirm('ডিলিট করবেন?'))return;expRef.child(k).remove().then(()=>showToast('ডিলিট হয়েছে'));}
 
-function openExpModal(){
-  if(!isAdmin){ showToast('অ্যাডমিন লগইন করুন প্রথমে'); return; }
-  document.getElementById('ex-id').value = '';
-  document.getElementById('ex-role').value = '';
-  document.getElementById('ex-org').value = '';
-  document.getElementById('ex-date').value = '';
-  document.getElementById('ex-desc').value = '';
-  openModal('exp-modal');
-}
+/* ═══ CONTACT ═══ */
+function sendMessage(){const n=document.getElementById('msg-name').value.trim(),e=document.getElementById('msg-email').value.trim(),t=document.getElementById('msg-text').value.trim();if(!n||!e||!t){showToast('সব ফিল্ড পূরণ করুন');return;}db.ref('messages').push({name:n,email:e,text:t,time:new Date().toISOString()}).then(()=>{showToast('মেসেজ পাঠানো হয়েছে ✅');['msg-name','msg-email','msg-text'].forEach(id=>document.getElementById(id).value='');}).catch(e=>showToast('এরর: '+e.message));}
 
-function editExp(key){
-  if(!isAdmin) return;
-  const e = _expCache[key];
-  if(!e) return;
-  document.getElementById('ex-id').value = key;
-  document.getElementById('ex-role').value = e.role || '';
-  document.getElementById('ex-org').value = e.org || '';
-  document.getElementById('ex-date').value = e.date || '';
-  document.getElementById('ex-desc').value = e.desc || '';
-  openModal('exp-modal');
-}
-
-function saveExp(){
-  const id = document.getElementById('ex-id').value;
-  const data = {
-    role: document.getElementById('ex-role').value.trim(),
-    org: document.getElementById('ex-org').value.trim(),
-    date: document.getElementById('ex-date').value.trim(),
-    desc: document.getElementById('ex-desc').value.trim()
-  };
-  if(!data.role){ showToast('পদবি দিন'); return; }
-  const ref = id ? expRef.child(id) : expRef.push();
-  ref.set(data)
-    .then(()=>{ closeModal('exp-modal'); showToast('সেভ হয়েছে ✅'); })
-    .catch(e=>showToast('এরর: '+e.message));
-}
-
-function deleteExp(key){
-  if(!confirm('এই অভিজ্ঞতা ডিলিট করবেন?')) return;
-  expRef.child(key).remove().then(()=>showToast('ডিলিট হয়েছে'));
-}
-
-/* ══════════════════ CONTACT MESSAGES ══════════════════ */
-function sendMessage(){
-  const name = document.getElementById('msg-name').value.trim();
-  const email = document.getElementById('msg-email').value.trim();
-  const text = document.getElementById('msg-text').value.trim();
-  if(!name || !email || !text){ showToast('সব ফিল্ড পূরণ করুন'); return; }
-  db.ref('messages').push({
-    name, email, text, time: new Date().toISOString()
-  }).then(()=>{
-    showToast('মেসেজ পাঠানো হয়েছে ✅');
-    document.getElementById('msg-name').value = '';
-    document.getElementById('msg-email').value = '';
-    document.getElementById('msg-text').value = '';
-  }).catch(e=>showToast('এরর: '+e.message));
-}
-
-/* ══════════════════ UTILS ══════════════════ */
-function escapeHtml(str){
-  if(!str) return '';
-  return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-function escapeAttr(str){ return escapeHtml(str); }
+/* UTILS */
+function escH(s){if(!s)return'';return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 </script>
 </body>
 </html>
